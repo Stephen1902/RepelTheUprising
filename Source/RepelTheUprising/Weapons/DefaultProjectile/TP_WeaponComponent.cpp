@@ -2,7 +2,7 @@
 
 
 #include "TP_WeaponComponent.h"
-#include "RepelTheUprisingCharacter.h"
+#include "../../Player/RepelTheUprisingCharacter.h"
 #include "RepelTheUprisingProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
