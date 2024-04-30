@@ -118,7 +118,7 @@ bool URTUHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
 		const ARepelTheUprisingCharacter* CharA = Cast<ARepelTheUprisingCharacter>(ActorA);
 		const ARepelTheUprisingCharacter* CharB = Cast<ARepelTheUprisingCharacter>(ActorB);
 
-		switch (EPVPMode PVPMode = GameModeRef->GetPVPMode())
+		switch (GameModeRef->GetPVPMode())
 		{
 			case EPVPMode::PVPAll:
 				return false;

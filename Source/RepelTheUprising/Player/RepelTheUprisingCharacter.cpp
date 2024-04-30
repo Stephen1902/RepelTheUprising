@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "RepelTheUprisingCharacter.h"
-#include "..\Weapons/DefaultProjectile/RepelTheUprisingProjectile.h"
+#include "../Weapons/DefaultProjectile/RepelTheUprisingProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "../Components/RTUHealthComponent.h"
+#include "../Components/RTUStaminaComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -36,6 +38,10 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+/** Components */
+	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
+	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
+
 }
 
 void ARepelTheUprisingCharacter::BeginPlay()
@@ -60,6 +66,10 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::Look);
+
+		// Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::StopSprint);
 	}
 	else
 	{
@@ -91,5 +101,21 @@ void ARepelTheUprisingCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void ARepelTheUprisingCharacter::StartSprint(const FInputActionValue& Value)
+{
+	if (StaminaComp)
+	{
+		StaminaComp->StartSprint();
+	}
+}
+
+void ARepelTheUprisingCharacter::StopSprint(const FInputActionValue& Value)
+{
+	if (StaminaComp)
+	{
+		StaminaComp->StopSprint();
 	}
 }

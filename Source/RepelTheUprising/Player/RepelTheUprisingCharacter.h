@@ -36,25 +36,37 @@ class ARepelTheUprisingCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
-	
+
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
+
+	/** Sprint Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
+
 public:
 	ARepelTheUprisingCharacter();
 
 protected:
 	virtual void BeginPlay();
 
-public:
-		
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
-
-protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Called for sprinting input */
+	void StartSprint(const FInputActionValue& Value);
+	void StopSprint(const FInputActionValue& Value);
+
+/** Components */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUHealthComponent* HealthComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUStaminaComponent* StaminaComp;
 
 protected:
 	// APawn interface
@@ -68,4 +80,3 @@ public:
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 };
-
