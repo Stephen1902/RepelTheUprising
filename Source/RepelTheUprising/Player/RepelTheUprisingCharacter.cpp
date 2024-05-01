@@ -68,7 +68,7 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::Look);
 
 		// Sprinting
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::StopSprint);
 	}
 	else
@@ -108,6 +108,7 @@ void ARepelTheUprisingCharacter::StartSprint(const FInputActionValue& Value)
 {
 	if (StaminaComp)
 	{
+		
 		StaminaComp->StartSprint();
 	}
 }
