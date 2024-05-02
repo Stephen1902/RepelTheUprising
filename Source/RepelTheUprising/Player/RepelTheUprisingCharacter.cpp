@@ -38,10 +38,18 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Set up defaults for the third person mesh 
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+	GetMesh()->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
+	GetMesh()->SetOnlyOwnerSee(false);
+	GetMesh()->SetOwnerNoSee(true);
+
 /** Components */
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
-
+	
+/** Variables */
+	bIsCrouching = false;
 }
 
 void ARepelTheUprisingCharacter::BeginPlay()
@@ -70,6 +78,9 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		// Sprinting
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::StopSprint);
+
+		// Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::ToggleCrouch);
 	}
 	else
 	{
@@ -106,9 +117,8 @@ void ARepelTheUprisingCharacter::Look(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::StartSprint(const FInputActionValue& Value)
 {
-	if (StaminaComp)
+	if (StaminaComp && !bIsCrouching)
 	{
-		
 		StaminaComp->StartSprint();
 	}
 }
@@ -118,5 +128,20 @@ void ARepelTheUprisingCharacter::StopSprint(const FInputActionValue& Value)
 	if (StaminaComp)
 	{
 		StaminaComp->StopSprint();
+	}
+}
+
+void ARepelTheUprisingCharacter::ToggleCrouch(const FInputActionValue& Value)
+{
+	bIsCrouching = !bIsCrouching;
+
+	if (bIsCrouching && StaminaComp)
+	{
+		Crouch();
+		StaminaComp->StopSprint();
+	}
+	else
+	{
+		UnCrouch();
 	}
 }
