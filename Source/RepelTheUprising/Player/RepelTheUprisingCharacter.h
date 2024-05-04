@@ -53,6 +53,12 @@ class ARepelTheUprisingCharacter : public ACharacter
 	/** Crouch Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* CrouchAction;
+
+
+
+	/** Test Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* TestAction;
 public:
 	ARepelTheUprisingCharacter();
 
@@ -71,6 +77,9 @@ protected:
 
 	/** Called for crouching input */
 	void ToggleCrouch(const FInputActionValue& Value);
+
+	/** Called for test action events */
+	void DoTestAction(const FInputActionValue& Value);
 
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
@@ -91,4 +100,9 @@ public:
 
 private:
 	bool bIsCrouching;
+	
+	UPROPERTY()
+	class ARTUPlayerState* PlayerStateRef;
+	
 };
+

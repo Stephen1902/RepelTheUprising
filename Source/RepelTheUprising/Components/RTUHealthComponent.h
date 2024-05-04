@@ -23,6 +23,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
 	uint8 TeamNum;
 
+	void RemoveSomeHealth();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

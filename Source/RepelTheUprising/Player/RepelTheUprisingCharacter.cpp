@@ -9,9 +9,12 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "RTUPlayerState.h"
+#include "SWarningOrErrorBox.h"
 #include "Engine/LocalPlayer.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
+#include "DataWrappers/ChaosVDQueryDataWrappers.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,6 +59,9 @@ void ARepelTheUprisingCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+//	PlayerStateRef = Cast<ARTUPlayerState>(GetPlayerState());
+	
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -81,13 +87,17 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 
 		// Crouching
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::ToggleCrouch);
+
+
+
+		// Test Action
+		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::DoTestAction);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
 
 void ARepelTheUprisingCharacter::Move(const FInputActionValue& Value)
 {
@@ -117,6 +127,7 @@ void ARepelTheUprisingCharacter::Look(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::StartSprint(const FInputActionValue& Value)
 {
+//	UE_LOG(LogTemp, Warning, TEXT("%s has a player level of %i"), *GetName(), PlayerStateRef->GetPlayerLevel());
 	if (StaminaComp && !bIsCrouching)
 	{
 		StaminaComp->StartSprint();
@@ -144,4 +155,10 @@ void ARepelTheUprisingCharacter::ToggleCrouch(const FInputActionValue& Value)
 	{
 		UnCrouch();
 	}
+}
+
+void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, (TEXT("Do Test Action called")));
+	HealthComp->RemoveSomeHealth();
 }

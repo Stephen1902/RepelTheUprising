@@ -17,6 +17,11 @@ URTUHealthComponent::URTUHealthComponent()
 }
 
 
+void URTUHealthComponent::RemoveSomeHealth()
+{
+	Health -= 10.f;
+}
+
 // Called when the game starts
 void URTUHealthComponent::BeginPlay()
 {
@@ -40,7 +45,7 @@ void URTUHealthComponent::BeginPlay()
 void URTUHealthComponent::OnRep_Health(float OldHealth)
 {
 	float Damage = Health - OldHealth;
-
+	
 	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
 }
 

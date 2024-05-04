@@ -18,6 +18,9 @@ public:
 	// Sets default settings for this class
 	ARTUPlayerState();
 
+	UFUNCTION(BlueprintCallable, Category = "TESTING")
+	int32 GetPlayerLevel() const { return PlayerLevel; }
+
 protected:
 	// Called on game start
 	virtual void BeginPlay() override;
