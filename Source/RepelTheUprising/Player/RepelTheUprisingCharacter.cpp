@@ -60,7 +60,7 @@ void ARepelTheUprisingCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-//	PlayerStateRef = Cast<ARTUPlayerState>(GetPlayerState());
+	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetPlayerStateRef, 0.5f, false, 0.5f);
 	
 }
 
@@ -127,7 +127,6 @@ void ARepelTheUprisingCharacter::Look(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::StartSprint(const FInputActionValue& Value)
 {
-//	UE_LOG(LogTemp, Warning, TEXT("%s has a player level of %i"), *GetName(), PlayerStateRef->GetPlayerLevel());
 	if (StaminaComp && !bIsCrouching)
 	{
 		StaminaComp->StartSprint();
@@ -161,4 +160,19 @@ void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, (TEXT("Do Test Action called")));
 	HealthComp->RemoveSomeHealth();
+}
+
+void ARepelTheUprisingCharacter::SetPlayerStateRef()
+{
+	PlayerStateRef = Cast<ARTUPlayerState>(GetPlayerState());
+	if (PlayerStateRef)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s got a valid player state"), *GetName());
+		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
+	}
+
 }

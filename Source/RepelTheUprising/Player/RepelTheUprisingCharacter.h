@@ -103,6 +103,8 @@ private:
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
-	
+	void SetPlayerStateRef();
+
+	FTimerHandle ReferenceDelayHandle;
 };
 
