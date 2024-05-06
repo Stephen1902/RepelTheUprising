@@ -106,7 +106,9 @@ private:
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
-	void SetPlayerStateRef();
+	UPROPERTY()
+	class ARepelTheUprisingGameMode* GameModeRef;
+	void SetReferences();
 
 	FTimerHandle ReferenceDelayHandle;
 };

@@ -14,6 +14,7 @@
 #include "../Components/RTUStaminaComponent.h"
 #include "DataWrappers/ChaosVDQueryDataWrappers.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
+#include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -162,17 +163,17 @@ void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
 	HealthComp->RemoveSomeHealth();
 }
 
-void ARepelTheUprisingCharacter::SetPlayerStateRef()
+void ARepelTheUprisingCharacter::SetReferences()
 {
 	PlayerStateRef = Cast<ARTUPlayerState>(GetPlayerState());
-	if (PlayerStateRef)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s got a valid player state"), *GetName());
-		
-	}
-	else
+	if (!PlayerStateRef)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
+	}
+	GameModeRef = Cast<ARepelTheUprisingGameMode>(GetWorld()->GetAuthGameMode());
+	if (!GameModeRef)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Game Mode Ref"), *GetName());
 	}
 
 }
