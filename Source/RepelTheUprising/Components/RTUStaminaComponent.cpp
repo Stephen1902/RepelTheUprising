@@ -28,12 +28,14 @@ void URTUStaminaComponent::StartSprint()
 {
 	SetCharacterSpeed(DefaultRunSpeed);
 	bIsSprinting = true;
+	OnSprintingChanged.Broadcast(bIsSprinting);
 }
 
 void URTUStaminaComponent::StopSprint()
 {
 	SetCharacterSpeed(DefaultWalkSpeed);
 	bIsSprinting = false;
+	OnSprintingChanged.Broadcast(bIsSprinting);
 }
 
 
@@ -87,7 +89,6 @@ void URTUStaminaComponent::SetCharacterSpeed(const float NewCharacterSpeed)
 	}
 
 	MovementComponentRef->MaxWalkSpeed = NewCharacterSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("%s has a movement speed of %f"), *OwningActor->GetName(), NewCharacterSpeed);
 }
 
 void URTUStaminaComponent::DrainStamina(const float DeltaTime)

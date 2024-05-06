@@ -10,11 +10,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "RTUPlayerState.h"
-#include "SWarningOrErrorBox.h"
-#include "Engine/LocalPlayer.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
 #include "DataWrappers/ChaosVDQueryDataWrappers.h"
+#include "RepelTheUprising/Components/RTUFoodComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -50,6 +49,7 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 /** Components */
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
+	FoodComp = CreateDefaultSubobject<URTUFoodComponent>(TEXT("Food Component"));
 	
 /** Variables */
 	bIsCrouching = false;

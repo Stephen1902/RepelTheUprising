@@ -88,6 +88,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUStaminaComponent* StaminaComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUFoodComponent* FoodComp;
+	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface

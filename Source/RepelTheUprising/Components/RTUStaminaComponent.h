@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "RTUStaminaComponent.generated.h"
 
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintingChanged, bool, NewSprintingState);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class REPELTHEUPRISING_API URTUStaminaComponent : public UActorComponent
 {
@@ -38,6 +41,9 @@ public:
 
 	void StartSprint();
 	void StopSprint();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSprintingChanged OnSprintingChanged;
 
 protected:
 	// Called when the game starts

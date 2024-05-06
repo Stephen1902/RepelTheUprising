@@ -30,6 +30,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Food Component")
 	float StartingFood;
+
+	// Food drain per second when owner is not using extra energy by sprinting, mining etc.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Food Component")
+	float FoodDrainStandard;
+
+	// Food drain per second when owner is using extra energy
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Food Component")
+	float FoodDrainExtra;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -41,4 +50,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Food Component")
 	void ConsumeFood(const float FoodAmount);
+
+private:
+	float MaxFood;
+	bool bUsingExtraEnergy;
+
+	UFUNCTION()
+	void SprintStatusChanged(bool NewStatusIn);
 };
