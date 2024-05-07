@@ -83,6 +83,9 @@ protected:
 
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUInventoryComponent* InventoryComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUHealthComponent* HealthComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)

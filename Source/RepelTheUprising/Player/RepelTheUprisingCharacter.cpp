@@ -14,6 +14,7 @@
 #include "../Components/RTUStaminaComponent.h"
 #include "DataWrappers/ChaosVDQueryDataWrappers.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
+#include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -48,6 +49,7 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 	GetMesh()->SetOwnerNoSee(true);
 
 /** Components */
+	InventoryComp = CreateDefaultSubobject<URTUInventoryComponent>(TEXT("Inventory Component"));
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
 	FoodComp = CreateDefaultSubobject<URTUFoodComponent>(TEXT("Food Component"));
@@ -61,7 +63,7 @@ void ARepelTheUprisingCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetPlayerStateRef, 0.5f, false, 0.5f);
+	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetReferences, 0.5f, false, 0.5f);
 	
 }
 
