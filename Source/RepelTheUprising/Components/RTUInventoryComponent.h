@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RepelTheUprising/Framework/InteractInterface.h"
 #include "RTUInventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,7 +26,7 @@ struct FSlotStruct
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class REPELTHEUPRISING_API URTUInventoryComponent : public UActorComponent
+class REPELTHEUPRISING_API URTUInventoryComponent : public UActorComponent, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -33,14 +34,37 @@ public:
 	// Sets default values for this component's properties
 	URTUInventoryComponent();
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	void AddToInventory();
 	void RemoveFromInventory();
 	
 protected:
+	// Called on game start
+	virtual void BeginPlay() override;
+	
 	// Number available inventory slots this component has 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	int32 InventorySlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
 	TArray<FSlotStruct> SlotStruct;
+
+	// How far in front of the player can they interact
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
+	double InteractionRange;
+	
+	// How often to do a line trace in seconds
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
+	double TimeBetweenTraceCheck;
+
+private:
+	UPROPERTY()
+	class ARepelTheUprisingCharacter* PlayerCharacterRef;
+	
+	float TimeSinceTraceLastCheck;
+	void DoInteractTrace();
+
+	UPROPERTY()
+	AActor* CurrentlyViewedActor;
 };
