@@ -1,0 +1,44 @@
+// Copyright 2024 DME Games
+
+#include "RTUItemComponent.h"
+
+// Sets default values for this component's properties
+URTUItemComponent::URTUItemComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DataTableInfo(TEXT("'/Game/Items/DT_ItemInfo'"));
+	if (DataTableInfo.Succeeded())
+	{
+		ItemID.DataTable = DataTableInfo.Object;
+	}
+
+	Quantity = 1;
+}
+
+
+// Called when the game starts
+void URTUItemComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetOwner()->SetReplicates(true);
+	
+}
+
+
+void URTUItemComponent::InteractWith_Implementation()
+{
+	GetOwner()->Destroy();
+}
+
+// Called every frame
+void URTUItemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+

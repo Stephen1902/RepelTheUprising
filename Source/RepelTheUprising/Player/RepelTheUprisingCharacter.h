@@ -54,7 +54,9 @@ class ARepelTheUprisingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* CrouchAction;
 
-
+	/** Interact Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 
 	/** Test Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
@@ -112,6 +114,8 @@ private:
 	UPROPERTY()
 	class ARepelTheUprisingGameMode* GameModeRef;
 	void SetReferences();
+
+	void InteractWith();
 
 	FTimerHandle ReferenceDelayHandle;
 };

@@ -2,6 +2,8 @@
 
 
 #include "RTUInventoryComponent.h"
+
+#include "RTUItemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
 
@@ -55,6 +57,37 @@ void URTUInventoryComponent::RemoveFromInventory()
 	
 }
 
+void URTUInventoryComponent::InteractWithItem()
+{
+	// This only needs to be done if there is a valid actor to interact with
+	if (CurrentlyViewedActor)
+	{
+		Server_InteractWithItem(CurrentlyViewedActor);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No CurrentlyViewedActor"));
+	}
+}
+
+void URTUInventoryComponent::Server_InteractWithItem_Implementation(AActor* TargetActor)
+{
+	UActorComponent* ItemComponent = CurrentlyViewedActor->GetComponentByClass(URTUItemComponent::StaticClass());
+	if (ItemComponent)
+	{
+		Execute_InteractWith(ItemComponent);
+	}
+	else  // What to do with items that don't have an item component ie a chest
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No valid Item Component"));	
+	}
+}
+
+bool URTUInventoryComponent::Server_InteractWithItem_Validate(AActor* TargetActor)
+{
+	return PlayerCharacterRef != nullptr;
+}
+
 void URTUInventoryComponent::DoInteractTrace()
 {
 	TimeSinceTraceLastCheck = 0.f;
@@ -81,10 +114,13 @@ void URTUInventoryComponent::DoInteractTrace()
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *TextToDisplay.ToString());
 		}
 	}
-	else if (CurrentlyViewedActor != nullptr)
+	else
 	{
-		// The player isn't looking at an interactive item, clear it
-		CurrentlyViewedActor = nullptr;
+		if (CurrentlyViewedActor != nullptr)
+		{
+			// The player isn't looking at an interactive item, clear it
+			CurrentlyViewedActor = nullptr;
+		}
 	}
 }
 

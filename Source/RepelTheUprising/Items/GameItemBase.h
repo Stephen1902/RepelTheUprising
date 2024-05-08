@@ -28,6 +28,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items")
 	FText TextToReturn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items")
+	class URTUItemComponent* ItemComponent;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

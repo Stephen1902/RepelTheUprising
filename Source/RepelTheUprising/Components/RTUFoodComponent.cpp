@@ -80,8 +80,6 @@ void URTUFoodComponent::ConsumeFood(const float FoodAmount)
 void URTUFoodComponent::SprintStatusChanged(bool NewStatusIn)
 {
 	bUsingExtraEnergy = NewStatusIn;
-	
-	UE_LOG(LogTemp, Warning, TEXT("%s has food of :%s"), *GetName(), *FString::SanitizeFloat(Food));
 }
 
 void URTUFoodComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

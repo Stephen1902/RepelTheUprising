@@ -91,7 +91,10 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		// Crouching
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::ToggleCrouch);
 
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::InteractWith);
 
+		
 
 		// Test Action
 		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::DoTestAction);
@@ -178,4 +181,12 @@ void ARepelTheUprisingCharacter::SetReferences()
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Game Mode Ref"), *GetName());
 	}
 
+}
+
+void ARepelTheUprisingCharacter::InteractWith()
+{
+	if (InventoryComp)
+	{
+		InventoryComp->InteractWithItem();
+	}
 }

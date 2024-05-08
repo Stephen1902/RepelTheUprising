@@ -25,6 +25,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	FText LookAt();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Things")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	void InteractWith();
 };

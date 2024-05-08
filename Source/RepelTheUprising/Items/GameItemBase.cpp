@@ -2,6 +2,9 @@
 
 #include "GameItemBase.h"
 
+#include "RepelTheUprising/Components/RTUItemComponent.h"
+#include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
+
 #define InteractTrace ECC_GameTraceChannel2
 
 // Sets default values
@@ -16,6 +19,8 @@ AGameItemBase::AGameItemBase()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Comp"));
 	MeshComponent->SetupAttachment(SceneComponent);
 	MeshComponent->SetCollisionResponseToChannel(InteractTrace, ECR_Block);
+
+	ItemComponent = CreateDefaultSubobject<URTUItemComponent>(TEXT("Item Component"));
 	
 	TextToReturn = FText::FromString("Default Text");
 	
@@ -37,6 +42,17 @@ void AGameItemBase::Tick(float DeltaTime)
 
 FText AGameItemBase::LookAt_Implementation()
 {
+	if (ItemComponent)
+	{
+		FDataTableRowHandle ItemID = ItemComponent->GetItemID();
+		const UDataTable* ItemTable = ItemID.DataTable;
+
+		if (FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(ItemID.RowName, ""))
+		{
+			const FString StringToReturn = "Pick up " + Row->ItemName.ToString();
+			TextToReturn = FText::FromString(StringToReturn);
+		}
+	}
 	return TextToReturn;	
 }
 

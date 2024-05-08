@@ -38,6 +38,9 @@ public:
 
 	void AddToInventory();
 	void RemoveFromInventory();
+	void InteractWithItem();
+
+	AActor* GetCurrentActor() const { return CurrentlyViewedActor; }
 	
 protected:
 	// Called on game start
@@ -57,6 +60,9 @@ protected:
 	// How often to do a line trace in seconds
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
 	double TimeBetweenTraceCheck;
+
+	UFUNCTION(Server, WithValidation, Reliable, Category = "Functions")
+	void Server_InteractWithItem(AActor* TargetActor);
 
 private:
 	UPROPERTY()
