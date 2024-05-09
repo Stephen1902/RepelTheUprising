@@ -36,7 +36,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void AddToInventory();
+	bool AddToInventory(FName ItemID, int32 Quantity, int32& QuantityRemaining);
 	void RemoveFromInventory();
 	void InteractWithItem();
 
@@ -67,10 +67,25 @@ protected:
 private:
 	UPROPERTY()
 	class ARepelTheUprisingCharacter* PlayerCharacterRef;
-	
+
+	// Data table where the item information is stored
+	UPROPERTY()
+	UDataTable* ItemTable;	
+
 	float TimeSinceTraceLastCheck;
 	void DoInteractTrace();
 
 	UPROPERTY()
 	AActor* CurrentlyViewedActor;
+
+	// Used to find a slot with the same item or an empty slot in the array
+	int32 FindExistingSlot(FName ItemID);
+	int32 HasEmptySlot();
+
+	int32 GetMaxStackSize(FName ItemID) const;
+	void CreateNewStack(int32 ItemIndex, FName ItemID, int32 QuantityToAdd);
+	void AddToStack(int32 IndexToAddTo, int32 QuantityToAdd);
+
+	//  DEBUG ONLY - REMOVE
+	void DEBUG();
 };

@@ -26,5 +26,5 @@ public:
 	FText LookAt();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
-	void InteractWith();
+	void InteractWith(class ARepelTheUprisingCharacter* CharacterWhoInteracted);
 };

@@ -29,7 +29,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Component")
 	int32 Quantity;
 
-	virtual void InteractWith_Implementation() override;
+	virtual void InteractWith_Implementation(class ARepelTheUprisingCharacter* CharacterWhoInteracted) override;
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

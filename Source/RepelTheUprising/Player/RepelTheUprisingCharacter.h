@@ -64,6 +64,8 @@ class ARepelTheUprisingCharacter : public ACharacter
 public:
 	ARepelTheUprisingCharacter();
 
+	class URTUInventoryComponent* GetInventoryComp() const { return InventoryComp; }
+
 protected:
 	virtual void BeginPlay();
 

@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "RepelTheUprisingCharacter.h"
-#include "../Weapons/DefaultProjectile/RepelTheUprisingProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -12,7 +11,7 @@
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
-#include "DataWrappers/ChaosVDQueryDataWrappers.h"
+#include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
@@ -175,7 +174,7 @@ void ARepelTheUprisingCharacter::SetReferences()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
 	}
-	GameModeRef = Cast<ARepelTheUprisingGameMode>(GetWorld()->GetAuthGameMode());
+	GameModeRef = Cast<ARepelTheUprisingGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameModeRef)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Game Mode Ref"), *GetName());

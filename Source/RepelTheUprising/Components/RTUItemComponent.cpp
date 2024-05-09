@@ -2,6 +2,9 @@
 
 #include "RTUItemComponent.h"
 
+#include "RTUInventoryComponent.h"
+#include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
+
 // Sets default values for this component's properties
 URTUItemComponent::URTUItemComponent()
 {
@@ -29,9 +32,24 @@ void URTUItemComponent::BeginPlay()
 }
 
 
-void URTUItemComponent::InteractWith_Implementation()
+void URTUItemComponent::InteractWith_Implementation(ARepelTheUprisingCharacter* CharacterWhoInteracted)
 {
-	GetOwner()->Destroy();
+	int32 HasQuantityRemaining;
+	
+	if (CharacterWhoInteracted)
+	{
+		if (URTUInventoryComponent* InventoryComponent = CharacterWhoInteracted->GetInventoryComp())
+		{
+			
+			InventoryComponent->AddToInventory(ItemID.RowName, Quantity, HasQuantityRemaining);
+			
+		}
+	}
+	
+	if (HasQuantityRemaining == 0)
+	{
+		GetOwner()->Destroy();
+	}
 }
 
 // Called every frame
