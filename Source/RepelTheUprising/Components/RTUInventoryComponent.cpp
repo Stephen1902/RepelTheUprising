@@ -90,8 +90,16 @@ bool URTUInventoryComponent::AddToInventory(FName ItemID, int32 Quantity, int32&
 			if (FoundSlot >= 0)
 			{
 				SlotStruct[FoundSlot].ItemID = ItemID;
-				SlotStruct[FoundSlot].Quantity = LocalQty;
-				LocalQty = 0;
+				if (GetMaxStackSize(ItemID) < LocalQty)
+				{
+					SlotStruct[FoundSlot].Quantity = GetMaxStackSize(ItemID);
+					LocalQty -= GetMaxStackSize(ItemID);
+				}
+				else
+				{
+					SlotStruct[FoundSlot].Quantity = LocalQty;
+					LocalQty = 0;
+				}
 			}
 			else
 			{
@@ -155,7 +163,6 @@ int32 URTUInventoryComponent::GetMaxStackSize(FName ItemID) const
 	}
 
 	return -1;
-
 }
 
 void URTUInventoryComponent::AddToStack(int32 Index, int32 QuantityToAdd)

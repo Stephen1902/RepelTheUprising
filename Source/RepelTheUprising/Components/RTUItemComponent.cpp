@@ -33,20 +33,16 @@ void URTUItemComponent::BeginPlay()
 
 
 void URTUItemComponent::InteractWith_Implementation(ARepelTheUprisingCharacter* CharacterWhoInteracted)
-{
-	int32 HasQuantityRemaining;
-	
+{	
 	if (CharacterWhoInteracted)
 	{
 		if (URTUInventoryComponent* InventoryComponent = CharacterWhoInteracted->GetInventoryComp())
 		{
-			
-			InventoryComponent->AddToInventory(ItemID.RowName, Quantity, HasQuantityRemaining);
-			
+			InventoryComponent->AddToInventory(ItemID.RowName, Quantity, Quantity);
 		}
 	}
 	
-	if (HasQuantityRemaining == 0)
+	if (Quantity == 0)
 	{
 		GetOwner()->Destroy();
 	}
