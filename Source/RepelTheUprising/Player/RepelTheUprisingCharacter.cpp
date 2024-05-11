@@ -11,10 +11,12 @@
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
+#include "RepelTheUprising/Widgets/RTUPlayerWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -93,6 +95,8 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		// Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::InteractWith);
 
+		// Player Menu
+		EnhancedInputComponent->BindAction(PlayerMenuAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::TogglePlayerWidget);
 		
 
 		// Test Action
@@ -187,5 +191,23 @@ void ARepelTheUprisingCharacter::InteractWith()
 	if (InventoryComp)
 	{
 		InventoryComp->InteractWithItem();
+	}
+}
+
+void ARepelTheUprisingCharacter::TogglePlayerWidget()
+{
+	if (PlayerWidgetRef == nullptr)
+	{
+		PlayerWidgetRef = CreateWidget<URTUPlayerWidget>(GetLocalViewingPlayerController(), PlayerMenuWidget);
+	}
+
+	if (!PlayerWidgetRef->IsInViewport())
+	{
+		PlayerWidgetRef->SetReferences(InventoryComp);
+		PlayerWidgetRef->AddToViewport();
+	}
+	else
+	{
+		PlayerWidgetRef->RemoveFromParent();
 	}
 }

@@ -41,6 +41,7 @@ public:
 	void InteractWithItem();
 
 	AActor* GetCurrentActor() const { return CurrentlyViewedActor; }
+	TArray<FSlotStruct> GetContents() const { return SlotStruct; }
 	
 protected:
 	// Called on game start

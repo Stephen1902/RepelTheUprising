@@ -58,6 +58,13 @@ class ARepelTheUprisingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
+	/** Player Menu Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* PlayerMenuAction;
+	
+
+	
+
 	/** Test Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* TestAction;
@@ -97,6 +104,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUFoodComponent* FoodComp;
+
+/** END OF COMPONENTS */
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widgets")
+	TSubclassOf<class URTUPlayerWidget> PlayerMenuWidget;
+	
 	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -119,6 +132,10 @@ private:
 
 	void InteractWith();
 
+	void TogglePlayerWidget();
+	UPROPERTY()
+	URTUPlayerWidget* PlayerWidgetRef;
+	
 	FTimerHandle ReferenceDelayHandle;
 };
 
