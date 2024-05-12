@@ -76,6 +76,12 @@ public:
 protected:
 	virtual void BeginPlay();
 
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputMappingContext* DefaultInputMapping;
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputMappingContext* MenuInputMapping;
+	
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -94,7 +100,7 @@ protected:
 
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
-	class URTUInventoryComponent* InventoryComp;
+	URTUInventoryComponent* InventoryComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUHealthComponent* HealthComp;
@@ -107,9 +113,12 @@ protected:
 
 /** END OF COMPONENTS */
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widgets")
-	TSubclassOf<class URTUPlayerWidget> PlayerMenuWidget;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class URTUPlayerHUD> PlayerHUDWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
+	URTUPlayerHUD* PlayerWidgetRef;
+
 	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -123,6 +132,7 @@ public:
 
 private:
 	bool bIsCrouching;
+	bool bInventoryIsShowing = false;
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
@@ -133,9 +143,9 @@ private:
 	void InteractWith();
 
 	void TogglePlayerWidget();
-	UPROPERTY()
-	URTUPlayerWidget* PlayerWidgetRef;
 	
 	FTimerHandle ReferenceDelayHandle;
+
+	
 };
 

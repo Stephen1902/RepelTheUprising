@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "RTUPlayerWidget.generated.h"
+#include "RTUInventoryWidget.generated.h"
 
 UCLASS()
-class REPELTHEUPRISING_API URTUPlayerWidget : public UUserWidget
+class REPELTHEUPRISING_API URTUInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -16,6 +16,7 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<class UCanvasPanel> PlayerCanvasPanel;
@@ -23,7 +24,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<class URTUInventoryGrid> PlayerInventoryGrid;
 
-private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "References")
 	URTUInventoryComponent* InventoryComponentRef;
 };

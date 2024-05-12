@@ -11,12 +11,11 @@
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
-#include "RepelTheUprising/Widgets/RTUPlayerWidget.h"
+#include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -65,7 +64,18 @@ void ARepelTheUprisingCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetReferences, 0.5f, false, 0.5f);
-	
+/*
+	if (PlayerHUDWidget)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		URTUPlayerHUD* PlayerWidgetR = CreateWidget<URTUPlayerHUD>(GetLocalViewingPlayerController(), PlayerHUDWidget);
+		//PlayerWidgetRef->AddToViewport();
+		if (PlayerWidgetR == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HUD Reference is invalid"));
+		}
+	}
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -196,18 +206,49 @@ void ARepelTheUprisingCharacter::InteractWith()
 
 void ARepelTheUprisingCharacter::TogglePlayerWidget()
 {
-	if (PlayerWidgetRef == nullptr)
+	if (PlayerWidgetRef != nullptr)
 	{
-		PlayerWidgetRef = CreateWidget<URTUPlayerWidget>(GetLocalViewingPlayerController(), PlayerMenuWidget);
-	}
+		if (!bInventoryIsShowing)
+		{
+			if (APlayerController* PC = Cast<APlayerController>(GetController()))
+			{
+				UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+				{
+					if (MenuInputMapping)
+					{
+						InputSystem->RemoveMappingContext(DefaultInputMapping);
+						InputSystem->AddMappingContext(MenuInputMapping, 0);
+						UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
+					}
+				}
 
-	if (!PlayerWidgetRef->IsInViewport())
-	{
-		PlayerWidgetRef->SetReferences(InventoryComp);
-		PlayerWidgetRef->AddToViewport();
+				PlayerWidgetRef->AddInventoryToHUD();
+				PC->SetShowMouseCursor(true);
+				bInventoryIsShowing = true;
+			}
+		}
+		else
+		{
+			if (APlayerController* PC = Cast<APlayerController>(GetController()))
+			{
+				UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+				{
+					if (MenuInputMapping)
+					{
+						InputSystem->RemoveMappingContext(MenuInputMapping);
+						InputSystem->AddMappingContext(DefaultInputMapping, 0);
+						UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
+					}
+				}
+
+				PlayerWidgetRef->RemoveInventory();
+				PC->SetShowMouseCursor(false);
+				bInventoryIsShowing = false;
+			}
+		}
 	}
 	else
 	{
-		PlayerWidgetRef->RemoveFromParent();
+		UE_LOG(LogTemp, Warning, TEXT("Player Widget Ref is not valid"));
 	}
 }
