@@ -22,12 +22,6 @@ void URTUInventoryWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to get either PlayerChar or InventoryComponentRef in URTUInventoryWidget"));
 	}
-
-/*	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	PC->SetInputMode(FInputModeUIOnly());
-	PC->SetShowMouseCursor(true);
-	*/
 }
 
 void URTUInventoryWidget::NativeDestruct()

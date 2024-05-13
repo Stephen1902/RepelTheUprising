@@ -10,6 +10,7 @@ void URTUPlayerHUD::AddInventoryToHUD()
 	{
 		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), InventoryWidgetRef);
 		CurrentWidgetRef->AddToViewport();
+		CurrentWidgetRef->SetFocus();
 	}
 }
 

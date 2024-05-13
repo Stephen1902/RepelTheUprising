@@ -2,24 +2,25 @@
 
 #include "RTUInventorySlot.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
 
-bool URTUInventorySlot::SetReferences(URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity)
+bool URTUInventorySlot::SetReferences(URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex)
 {
 	InventoryCompRef = INInventoryCompRef;
 	ItemID = INItemID;
 	Quantity = INQuantity;
+	ContentIndex = INContentIndex;
 
 	return InventoryCompRef != nullptr;
 }
 
 void URTUInventorySlot::UpdateItemSlot() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Update Item slot called"))
 	if (ItemTable)
 	{
 		if (const FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(ItemID, ""))

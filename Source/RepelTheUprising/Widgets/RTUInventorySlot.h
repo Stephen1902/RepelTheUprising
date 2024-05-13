@@ -19,7 +19,7 @@ class REPELTHEUPRISING_API URTUInventorySlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	bool SetReferences(class URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity);
+	bool SetReferences(class URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex);
 	void UpdateItemSlot() const;
 	
 protected:
@@ -64,6 +64,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	int32 Quantity = -1;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	int32 ContentIndex;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Tables")
 	UDataTable* ItemTable;
+
 };
