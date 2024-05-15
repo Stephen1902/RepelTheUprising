@@ -7,6 +7,8 @@
 #include "RepelTheUprising/Framework/InteractInterface.h"
 #include "RTUInventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+
 USTRUCT(BlueprintType)
 struct FSlotStruct
 {
@@ -39,9 +41,13 @@ public:
 	bool AddToInventory(FName ItemID, int32 Quantity, int32& QuantityRemaining);
 	void RemoveFromInventory();
 	void InteractWithItem();
+	bool TransferSlots(int32 SourceIndex, URTUInventoryComponent* SourceInventory, int32 TargetIndex);
 
 	AActor* GetCurrentActor() const { return CurrentlyViewedActor; }
 	TArray<FSlotStruct> GetContents() const { return SlotStruct; }
+
+	UPROPERTY()
+	FOnInventoryUpdated OnInventoryUpdated;
 	
 protected:
 	// Called on game start
@@ -64,6 +70,12 @@ protected:
 
 	UFUNCTION(Server, WithValidation, Reliable, Category = "Functions")
 	void Server_InteractWithItem(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Functions")
+	void Server_TransferSlots(int32 SourceIndex, URTUInventoryComponent* SourceInventory, int32 TargetIndex);
+	
+	UFUNCTION(NetMulticast, reliable)
+	void UpdateInventory();
 
 private:
 	UPROPERTY()
@@ -89,4 +101,6 @@ private:
 
 	//  DEBUG ONLY - REMOVE
 	void DEBUG();
+
+	void SwapElements(const FSlotStruct INItemID, int32 INSlotToUse);
 };

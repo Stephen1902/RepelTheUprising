@@ -18,6 +18,7 @@ class REPELTHEUPRISING_API URTUInventoryGrid : public UUserWidget
 
 public:
 	void SetReferences(URTUInventoryComponent* InventoryComponentIN);
+	UFUNCTION()
 	void PopulateWrapBox();
 	
 protected:
@@ -32,6 +33,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot Widget")
 	TSubclassOf<class URTUInventorySlot> SlotWidget;
+
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateInventory();
 private:
 	UPROPERTY()
 	TObjectPtr<URTUInventoryComponent> InventoryCompRef;

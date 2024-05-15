@@ -8,15 +8,18 @@
 
 void URTUInventoryGrid::SetReferences(URTUInventoryComponent* InventoryComponentIN)
 {
-	if (InventoryComponentIN != nullptr)
+	if (InventoryComponentIN != nullptr && InventoryCompRef == nullptr)
 	{
 		InventoryCompRef = InventoryComponentIN;
-		PopulateWrapBox();
+		InventoryCompRef->OnInventoryUpdated.AddDynamic(this, &URTUInventoryGrid::ClientUpdateInventory);
 	}
+
+	PopulateWrapBox();
 }
 
 void URTUInventoryGrid::PopulateWrapBox()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Populate Wrap Box Called"));
 	// Remove all existing items already created
 	GridWrapBox->ClearChildren();
 
@@ -38,3 +41,8 @@ void URTUInventoryGrid::PopulateWrapBox()
 	}
 }
 
+void URTUInventoryGrid::ClientUpdateInventory_Implementation()
+{
+	FTimerHandle UpdateDelayTimer;
+	GetWorld()->GetTimerManager().SetTimer(UpdateDelayTimer, this, &URTUInventoryGrid::PopulateWrapBox, 0.1f, false);
+}

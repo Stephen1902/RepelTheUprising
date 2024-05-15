@@ -191,6 +191,43 @@ void URTUInventoryComponent::InteractWithItem()
 	}
 }
 
+bool URTUInventoryComponent::TransferSlots(int32 SourceIndex, URTUInventoryComponent* SourceInventory, int32 TargetIndex)
+{
+	if (SourceInventory == nullptr)
+	{
+		return false;
+	}
+	
+	TArray<FSlotStruct> LocalSource = SourceInventory->GetContents();
+	const FSlotStruct SourceToUse = LocalSource[SourceIndex];
+
+	if (TargetIndex < 0)
+	{
+	
+	}
+	else
+	{
+		// Check if what is being dropped is the same as what is already in the array
+		if (SourceToUse.ItemID == SlotStruct[TargetIndex].ItemID)
+		{
+			
+		}
+		else
+		{
+			SourceInventory->SwapElements(SlotStruct[TargetIndex], SourceIndex);
+			SlotStruct[TargetIndex] = SourceToUse;
+			// Update the inventory on both client and server, both local and source inventories
+			UpdateInventory();
+			if (SourceInventory != this)
+			{
+				SourceInventory->UpdateInventory();
+			}
+		}
+	}
+	
+	return true;
+}
+
 void URTUInventoryComponent::Server_InteractWithItem_Implementation(AActor* TargetActor)
 {
 	UActorComponent* ItemComponent = CurrentlyViewedActor->GetComponentByClass(URTUItemComponent::StaticClass());
@@ -208,6 +245,21 @@ void URTUInventoryComponent::Server_InteractWithItem_Implementation(AActor* Targ
 bool URTUInventoryComponent::Server_InteractWithItem_Validate(AActor* TargetActor)
 {
 	return PlayerCharacterRef != nullptr;
+}
+
+void URTUInventoryComponent::UpdateInventory_Implementation()
+{
+	OnInventoryUpdated.Broadcast();
+}
+
+void URTUInventoryComponent::Server_TransferSlots_Implementation(const int32 SourceIndex, URTUInventoryComponent* SourceInventory, const int32 TargetIndex)
+{
+	TransferSlots(SourceIndex, SourceInventory, TargetIndex);
+}
+
+bool URTUInventoryComponent::Server_TransferSlots_Validate(int32 SourceIndex,	URTUInventoryComponent* SourceInventory, int32 TargetIndex)
+{
+	return SourceInventory != nullptr;
 }
 
 void URTUInventoryComponent::DoInteractTrace()
@@ -255,6 +307,10 @@ void URTUInventoryComponent::DEBUG()
 	}
 }
 
+void URTUInventoryComponent::SwapElements(const FSlotStruct INItemID, int32 INSlotToUse)
+{
+	SlotStruct[INSlotToUse] = INItemID;
+}
 
 void URTUInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
