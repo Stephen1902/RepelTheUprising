@@ -11,10 +11,8 @@
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
-#include "RepelTheUprising/Framework/RepelTheUprisingGameMode.h"
 #include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -188,17 +186,17 @@ void ARepelTheUprisingCharacter::SetReferences()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
 	}
-	GameModeRef = Cast<ARepelTheUprisingGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (!GameModeRef)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Game Mode Ref"), *GetName());
-	}
-
 }
 
 void ARepelTheUprisingCharacter::InteractWith()
 {
-	if (InventoryComp)
+	if (bHUDIsShowing)
+	{
+		ChangeInputToGame();
+		PlayerWidgetRef->RemoveCurrentWidget();
+		bHUDIsShowing = false;
+	}
+	else if (InventoryComp)
 	{
 		InventoryComp->InteractWithItem();
 	}
@@ -208,47 +206,84 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 {
 	if (PlayerWidgetRef != nullptr)
 	{
+		// Check if an existing HUD, container, trader inventory etc. is already on screen
+		if (bHUDIsShowing)
+		{
+			PlayerWidgetRef->RemoveCurrentWidget();
+			bHUDIsShowing = false;
+		}
+		
 		if (!bInventoryIsShowing)
 		{
-			if (APlayerController* PC = Cast<APlayerController>(GetController()))
-			{
-				UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
-				{
-					if (MenuInputMapping)
-					{
-						InputSystem->RemoveMappingContext(DefaultInputMapping);
-						InputSystem->AddMappingContext(MenuInputMapping, 0);
-						UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
-					}
-				}
-
+				ChangeInputToUI();
 				PlayerWidgetRef->AddInventoryToHUD();
-				PC->SetShowMouseCursor(true);
 				bInventoryIsShowing = true;
-			}
 		}
 		else
 		{
-			if (APlayerController* PC = Cast<APlayerController>(GetController()))
-			{
-				UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
-				{
-					if (MenuInputMapping)
-					{
-						InputSystem->RemoveMappingContext(MenuInputMapping);
-						InputSystem->AddMappingContext(DefaultInputMapping, 0);
-						UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
-					}
-				}
-
-				PlayerWidgetRef->RemoveInventory();
-				PC->SetShowMouseCursor(false);
+				ChangeInputToGame();
+				PlayerWidgetRef->RemoveCurrentWidget();
 				bInventoryIsShowing = false;
 			}
-		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player Widget Ref is not valid"));
 	}
+}
+
+void ARepelTheUprisingCharacter::ChangeInputToUI()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		{
+			if (MenuInputMapping)
+			{
+				InputSystem->RemoveMappingContext(DefaultInputMapping);
+				InputSystem->AddMappingContext(MenuInputMapping, 0);
+				UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
+			}
+		}
+
+		PC->SetShowMouseCursor(true);
+	}
+}
+
+void ARepelTheUprisingCharacter::ChangeInputToGame()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+ 	{
+ 		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+ 		{
+ 			if (MenuInputMapping)
+ 			{
+ 				InputSystem->RemoveMappingContext(MenuInputMapping);
+ 				InputSystem->AddMappingContext(DefaultInputMapping, 0);
+ 				UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
+ 			}
+ 		}
+ 
+ 		PC->SetShowMouseCursor(false);
+ 	}
+}
+
+void ARepelTheUprisingCharacter::AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToCreate, URTUInventoryComponent* ContainerInventory)
+{
+	if (PlayerWidgetRef)
+	{
+		if (!bHUDIsShowing)
+		{
+			ChangeInputToUI();
+			PlayerWidgetRef->AddContainerToHUD(WidgetToCreate, ContainerInventory, InventoryComp);
+			bHUDIsShowing = true;
+		}
+		else
+		{
+			ChangeInputToGame();
+			PlayerWidgetRef->RemoveCurrentWidget();
+			bHUDIsShowing = false;
+		}
+	}
+	
 }

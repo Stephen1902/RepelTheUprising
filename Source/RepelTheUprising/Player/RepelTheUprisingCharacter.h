@@ -73,6 +73,8 @@ public:
 
 	class URTUInventoryComponent* GetInventoryComp() const { return InventoryComp; }
 
+	void AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToCreate, URTUInventoryComponent* ContainerInventory);
+
 protected:
 	virtual void BeginPlay();
 
@@ -119,7 +121,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	URTUPlayerHUD* PlayerWidgetRef;
 
-	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
@@ -133,11 +134,10 @@ public:
 private:
 	bool bIsCrouching;
 	bool bInventoryIsShowing = false;
+	bool bHUDIsShowing = false;
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
-	UPROPERTY()
-	class ARepelTheUprisingGameMode* GameModeRef;
 	void SetReferences();
 
 	void InteractWith();
@@ -145,7 +145,8 @@ private:
 	void TogglePlayerWidget();
 	
 	FTimerHandle ReferenceDelayHandle;
-
+	void ChangeInputToUI();
+	void ChangeInputToGame();
 	
 };
 

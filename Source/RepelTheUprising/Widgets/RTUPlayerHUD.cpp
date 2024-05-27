@@ -2,19 +2,37 @@
 
 
 #include "RTUPlayerHUD.h"
-#include "RTUInventoryWidget.h"
+#include "RTUContainerWidget.h"
 
 void URTUPlayerHUD::AddInventoryToHUD()
 {
-	if (InventoryWidgetRef)
+	if (InventoryWidget)
 	{
-		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), InventoryWidgetRef);
+		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), InventoryWidget);
 		CurrentWidgetRef->AddToViewport();
 		CurrentWidgetRef->SetFocus();
 	}
 }
 
-void URTUPlayerHUD::RemoveInventory()
+void URTUPlayerHUD::AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToDisplay, URTUInventoryComponent* ContainerInventory, URTUInventoryComponent* PlayerInventory)
 {
-	CurrentWidgetRef->RemoveFromParent();
+	if (WidgetToDisplay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Valid widget passed to Player HUD"));
+		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), WidgetToDisplay);
+		CurrentWidgetRef->AddToViewport();
+		URTUContainerWidget* ContainerWidgetRef = Cast<URTUContainerWidget>(CurrentWidgetRef);
+		ContainerWidgetRef->SetInventoryComp(ContainerInventory, PlayerInventory);
+		CurrentWidgetRef->SetFocus();		
+	}
 }
+
+void URTUPlayerHUD::RemoveCurrentWidget()
+{
+	if (CurrentWidgetRef != nullptr)
+	{
+		CurrentWidgetRef->RemoveFromParent();
+		CurrentWidgetRef = nullptr;
+	}
+}
+

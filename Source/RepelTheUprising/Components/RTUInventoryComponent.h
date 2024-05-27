@@ -77,6 +77,8 @@ protected:
 	UFUNCTION(NetMulticast, reliable)
 	void UpdateInventory();
 
+	UFUNCTION(Client, WithValidation, Reliable, Category = "Functions")
+	void Client_Interact(AActor* ActorToInteractWith, AActor* InteractingActor);
 private:
 	UPROPERTY()
 	class ARepelTheUprisingCharacter* PlayerCharacterRef;

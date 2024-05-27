@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
+#include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 
 #define InteractTrace ECC_GameTraceChannel2
 
@@ -238,7 +239,13 @@ void URTUInventoryComponent::Server_InteractWithItem_Implementation(AActor* Targ
 	}
 	else  // What to do with items that don't have an item component ie a chest
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No valid Item Component"));	
+		if (TargetActor)
+		{
+			const ARepelTheUprisingCharacter* OwningPlayer = Cast<ARepelTheUprisingCharacter>(GetOwner());
+			AActor* OwningController = (OwningPlayer->GetController());
+			TargetActor->SetOwner(OwningController);
+			Client_Interact(TargetActor, GetOwner());
+		}
 	}
 }
 
@@ -246,6 +253,17 @@ bool URTUInventoryComponent::Server_InteractWithItem_Validate(AActor* TargetActo
 {
 	return PlayerCharacterRef != nullptr;
 }
+
+void URTUInventoryComponent::Client_Interact_Implementation(AActor* ActorToInteractWith, AActor* InteractingActor)
+{
+	Execute_InteractWith(ActorToInteractWith, Cast<ARepelTheUprisingCharacter>(InteractingActor));
+}
+
+bool URTUInventoryComponent::Client_Interact_Validate(AActor* ActorToInteractWith, AActor* InteractingActor)
+{
+	return InteractingActor != nullptr;
+}
+
 
 void URTUInventoryComponent::UpdateInventory_Implementation()
 {
