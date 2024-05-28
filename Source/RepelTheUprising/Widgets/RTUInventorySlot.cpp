@@ -29,7 +29,7 @@ void URTUInventorySlot::UpdateItemSlot() const
 			IconImage->SetVisibility(ESlateVisibility::Visible);
 			QtyTextBox->SetText(FText::FromString(FString::FromInt(Quantity)));
 			// Adjust the font size, depending on how large the quantity is
-			FSlateFontInfo FontInfo;
+		/*	FSlateFontInfo FontInfo;
 			FontInfo.Size = 8;
 			if (Quantity > 9 && Quantity < 100)
 			{
@@ -44,7 +44,8 @@ void URTUInventorySlot::UpdateItemSlot() const
 				FontInfo.Size = 4.5;
 			}
 		
-			QtyTextBox->SetFont(FontInfo);			
+			QtyTextBox->SetFont(FontInfo);
+		*/
 			QtySizeBox->SetVisibility(ESlateVisibility::Visible);
 		}
 		else

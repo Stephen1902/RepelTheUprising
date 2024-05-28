@@ -33,7 +33,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
 	TSubclassOf<class URTUContainerWidget> ContainerWidget;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class URTUInventoryComponent> InventoryComp;
 
 public:	

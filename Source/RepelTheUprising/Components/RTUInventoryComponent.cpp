@@ -129,7 +129,6 @@ int32 URTUInventoryComponent::FindExistingSlot(FName ItemID)
 			{
 				return i;
 			}
-
 		}
 	}
 	
@@ -211,7 +210,27 @@ bool URTUInventoryComponent::TransferSlots(int32 SourceIndex, URTUInventoryCompo
 		// Check if what is being dropped is the same as what is already in the array
 		if (SourceToUse.ItemID == SlotStruct[TargetIndex].ItemID)
 		{
+			// Get the total amount of items from both inventories to check against the max stack size
+			const int32 TotalSlotQty = SlotStruct[TargetIndex].Quantity + SourceToUse.Quantity;
+			// Check against the max stack size to see if there are any left over
 			
+			if (const int32 RemainingQty = TotalSlotQty - GetMaxStackSize(SlotStruct[TargetIndex].ItemID) > 0)
+			{
+				// There is a value left over.  Put it back in the source inventory
+				//SourceInventory->SlotStruct[SourceIndex].ItemID = SlotStruct[TargetIndex].ItemID;
+				SourceInventory->SlotStruct[SourceIndex].Quantity = RemainingQty;
+				SourceInventory->UpdateInventory();
+				
+				// Set the target inventory to the max stack size 
+				SlotStruct[TargetIndex].Quantity = GetMaxStackSize(SlotStruct[TargetIndex].ItemID);
+			}
+			else
+			{
+				// The amount does not exceed the max stack size, set the target to the total
+				SlotStruct[TargetIndex].Quantity = TotalSlotQty;
+			}
+			
+			UpdateInventory();
 		}
 		else
 		{
