@@ -22,7 +22,7 @@ AGameItemBase::AGameItemBase()
 
 	ItemComponent = CreateDefaultSubobject<URTUItemComponent>(TEXT("Item Component"));
 	
-	TextToReturn = FText::FromString("Default Text");
+	TextToReturn = FText::FromString("Default Name");
 	
 }
 

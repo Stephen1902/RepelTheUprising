@@ -54,6 +54,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UTextBlock> QtyTextBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	TSubclassOf<class URTUDragDropWidget> DragDropWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	TSubclassOf<class URTUActionMenuWidget> ActionMenuWidget;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	TObjectPtr<URTUInventoryComponent> InventoryCompRef = nullptr;
@@ -70,4 +76,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Tables")
 	UDataTable* ItemTable;
 
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
+private:
+	UPROPERTY()
+	TObjectPtr<URTUActionMenuWidget> ActionMenuWidgetRef;
 };
