@@ -57,4 +57,13 @@ private:
 	TObjectPtr<class URTUInventoryComponent> InventoryComponentRef;
 	
 	int32 ContentIndex;
+
+	UFUNCTION()
+	void UseButtonClicked();
+
+	UFUNCTION()
+	void DropOneButtonClicked();
+
+	UFUNCTION()
+	void DropAllButtonClicked();
 };

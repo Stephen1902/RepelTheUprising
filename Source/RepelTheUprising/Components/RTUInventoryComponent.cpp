@@ -3,10 +3,13 @@
 
 #include "RTUInventoryComponent.h"
 #include "RTUItemComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
 #include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
+#include "RepelTheUprising/Widgets/RTU_DisplayMessage.h"
 
 #define InteractTrace ECC_GameTraceChannel2
 
@@ -38,10 +41,32 @@ void URTUInventoryComponent::BeginPlay()
 	PlayerCharacterRef = Cast<ARepelTheUprisingCharacter>(GetOwner());
 
 	SlotStruct.SetNum(InventorySlots);
+
+	Client_AddMessageWidget();
+}
+
+void URTUInventoryComponent::Server_DropItem_Implementation(FName ItemID, int32 Quantity)
+{
+	for (int32 i = 0; i < Quantity; ++i)
+	{
+		if (FItemInformationTable* Row = GetCurrentItemInfo(ItemID))
+		{
+			FTransform NewTransform;
+			NewTransform.SetLocation(GetDropLocation());
+			NewTransform.SetRotation(FQuat(0.f, 0.f, UKismetMathLibrary::RandomIntegerInRange(0, 359), 0.f));
+			NewTransform.SetScale3D(FVector(1.f));
+			GetWorld()->SpawnActor<AActor>(Row->ActorOnDrop, NewTransform, FActorSpawnParameters());
+		}
+	}
+}
+
+void URTUInventoryComponent::Server_RemoveFromInventory_Implementation(int32 ItemIndexIN, bool RemoveWholeStackIN, bool ConsumeIN)
+{
+	RemoveFromInventory(ItemIndexIN, RemoveWholeStackIN, ConsumeIN);
 }
 
 void URTUInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -114,9 +139,44 @@ bool URTUInventoryComponent::AddToInventory(FName ItemID, int32 Quantity, int32&
 	return !bHasFailed;
 }
 
-void URTUInventoryComponent::RemoveFromInventory()
+void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWholeStack, bool Consume)
 {
-	
+	FName LocalItemID = SlotStruct[ItemIndex].ItemID;
+	int32 LocalQty = SlotStruct[ItemIndex].Quantity;
+
+	if (RemoveWholeStack || LocalQty == 1)
+	{
+		SlotStruct[ItemIndex].ItemID = FName("Default Name");
+		SlotStruct[ItemIndex].Quantity = 0;
+
+		if (Consume)
+		{
+			
+		}
+		else
+		{
+			Server_DropItem(LocalItemID, LocalQty);
+		}
+	}
+	else
+	{
+		// We are only removing one from the stack
+		LocalQty -= 1;
+		SlotStruct[ItemIndex].Quantity = LocalQty;
+
+		// Check if one is being removed because we are consuming this
+		if (Consume)
+		{
+			
+		}
+		else
+		{
+			// Otherwise, the item is to be dropped into the world
+			Server_DropItem(LocalItemID, 1);	
+		}
+	}
+
+	UpdateInventory();
 }
 
 int32 URTUInventoryComponent::FindExistingSlot(FName ItemID)
@@ -148,20 +208,15 @@ int32 URTUInventoryComponent::HasEmptySlot()
 	return -1;
 }
 
-int32 URTUInventoryComponent::GetMaxStackSize(FName ItemID) const
+int32 URTUInventoryComponent::GetMaxStackSize(FName ItemID)
 {
-	if (ItemTable)
+	if (const FItemInformationTable* Row = GetCurrentItemInfo(ItemID))
 	{
-		if (const FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(ItemID, ""))
-		{
-			return Row->MaxStackSize;
-		}
+		return Row->MaxStackSize;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No valid table found in Inventory Component of %s"), *GetName());
-	}
-
+	
+	// Failed to get a valid row
+	UE_LOG(LogTemp, Warning, TEXT("Failed to get a valid Row in %s"), *GetName());
 	return -1;
 }
 
@@ -299,6 +354,43 @@ bool URTUInventoryComponent::Server_TransferSlots_Validate(int32 SourceIndex,	UR
 	return SourceInventory != nullptr;
 }
 
+void URTUInventoryComponent::Client_AddMessageWidget_Implementation()
+{
+	if (DisplayMessageWidget)
+	{
+		if (PlayerCharacterRef)
+		{
+			APlayerController* OwningController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			if (OwningController)
+			{
+				DisplayMessageRef = CreateWidget<URTU_DisplayMessage>(OwningController, DisplayMessageWidget);
+				if (DisplayMessageRef)
+				{
+					DisplayMessageRef->AddToViewport();
+				}
+			}
+		}
+	}
+}
+
+bool URTUInventoryComponent::Client_AddMessageWidget_Validate()
+{
+	return GetOwner() != nullptr;
+}
+
+FItemInformationTable* URTUInventoryComponent::GetCurrentItemInfo(FName INItemID)
+{
+	if (ItemTable)
+	{
+		if (FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(INItemID, ""))
+		{
+			return Row;
+		}
+	}
+
+	return nullptr;
+}
+
 void URTUInventoryComponent::DoInteractTrace()
 {
 	TimeSinceTraceLastCheck = 0.f;
@@ -321,8 +413,11 @@ void URTUInventoryComponent::DoInteractTrace()
 		if (CurrentlyViewedActor != HitResult.GetActor())
 		{
 			CurrentlyViewedActor = HitResult.GetActor();
-			const FText TextToDisplay = Execute_LookAt(CurrentlyViewedActor);
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *TextToDisplay.ToString());
+			if (PlayerCharacterRef && PlayerCharacterRef->IsLocallyControlled() && DisplayMessageRef)
+			{
+				const FText TextToDisplay = Execute_LookAt(CurrentlyViewedActor);
+				DisplayMessageRef->SetMessageText(TextToDisplay);
+			}
 		}
 	}
 	else
@@ -331,6 +426,10 @@ void URTUInventoryComponent::DoInteractTrace()
 		{
 			// The player isn't looking at an interactive item, clear it
 			CurrentlyViewedActor = nullptr;
+			if (DisplayMessageRef)
+			{
+				DisplayMessageRef->SetMessageText(FText::FromString(""));
+			}
 		}
 	}
 }
@@ -347,6 +446,21 @@ void URTUInventoryComponent::DEBUG()
 void URTUInventoryComponent::SwapElements(const FSlotStruct INItemID, int32 INSlotToUse)
 {
 	SlotStruct[INSlotToUse] = INItemID;
+}
+
+FVector URTUInventoryComponent::GetDropLocation() const
+{
+	const FVector StartLoc = (UKismetMathLibrary::RandomUnitVectorInConeInDegrees(GetOwner()->GetActorForwardVector(), 30) * 150) + GetOwner()->GetActorLocation();
+	const FVector EndLoc = StartLoc - FVector(0.f, 0.f, 500.f);
+
+	FHitResult HitResult;
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLoc, EndLoc, ECC_Visibility))
+	{
+		return HitResult.Location;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Failed to get a valid drop location"));
+	return FVector(0.f);
 }
 
 void URTUInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

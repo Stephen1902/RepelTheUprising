@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/VerticalBox.h"
+#include "RepelTheUprising/Components/RTUInventoryComponent.h"
 
 void URTUActionMenuWidget::SetReferences(URTUInventoryComponent* InventoryComponentIN, int32 IndexIN)
 {
@@ -24,8 +25,11 @@ void URTUActionMenuWidget::NativePreConstruct()
 	ButtonStyle.Pressed.TintColor = FSlateColor(FLinearColor(0.1f, 0.1f, 0.1f, 1.0f));
 	
 	MenuButtonUse->SetStyle(ButtonStyle);
+	MenuButtonUse->OnClicked.AddDynamic(this, &URTUActionMenuWidget::UseButtonClicked);
 	MenuButtonDropOne->SetStyle(ButtonStyle);
+	MenuButtonDropOne->OnClicked.AddDynamic(this, &URTUActionMenuWidget::DropOneButtonClicked);
 	MenuButtonDropAll->SetStyle(ButtonStyle);
+	MenuButtonDropAll->OnClicked.AddDynamic(this, &URTUActionMenuWidget::DropAllButtonClicked);
 	
 	MenuTextUse->SetText(FText::FromString("Use"));
 	MenuTextDropOne->SetText(FText::FromString("Drop One"));
@@ -62,4 +66,31 @@ void URTUActionMenuWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 	Super::NativeOnMouseLeave(InMouseEvent);
 
 	RemoveFromParent();	
+}
+
+void URTUActionMenuWidget::UseButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("UseButtonClicked"));
+	if (InventoryComponentRef)
+	{
+		InventoryComponentRef->Server_RemoveFromInventory(ContentIndex, false, true);
+	}
+}
+
+void URTUActionMenuWidget::DropOneButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("DropOneButtonClicked"));
+	if (InventoryComponentRef)
+	{
+		InventoryComponentRef->Server_RemoveFromInventory(ContentIndex, false, false);
+	}
+}
+
+void URTUActionMenuWidget::DropAllButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("DropAllButtonClicked"));
+	if (InventoryComponentRef)
+	{
+		InventoryComponentRef->Server_RemoveFromInventory(ContentIndex, true, false);
+	}
 }
