@@ -39,6 +39,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	bool QueryInventory(FName INItemID, int32 QuantityRequired, int32& QuantityFound);
 	bool AddToInventory(FName ItemID, int32 Quantity, int32& QuantityRemaining);
 	void RemoveFromInventory(int32 ItemIndex, bool RemoveWholeStack, bool Consume);
 	void InteractWithItem();

@@ -85,6 +85,30 @@ void URTUInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
+bool URTUInventoryComponent::QueryInventory(FName INItemID, int32 QuantityRequired, int32& QuantityFound)
+{
+	if (INItemID != FName("Default Name"))
+	{
+		int32 LocalQtyFound = 0;
+
+		for (auto& It : SlotStruct)
+		{
+			if (It.ItemID == INItemID)
+			{
+				LocalQtyFound += It.Quantity;
+			}
+		}
+
+		QuantityFound = LocalQtyFound;
+		if (QuantityFound >= QuantityRequired)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 bool URTUInventoryComponent::AddToInventory(FName ItemID, int32 Quantity, int32& QuantityRemaining)
 {
 	// Used to keep track of how many are left to try to add to the inventory
