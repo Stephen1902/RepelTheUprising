@@ -88,7 +88,7 @@ FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 			return ReplyResult.NativeReply;			
 		}
 		
-		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton) && Quantity > 0)
 		{
 			if (ActionMenuWidget)
 			{
@@ -96,6 +96,7 @@ FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 				if (ActionMenuWidgetRef)
 				{
 					ActionMenuWidgetRef->RemoveFromParent();
+					ActionMenuWidgetRef = nullptr;
 				}
 				
 				ActionMenuWidgetRef = CreateWidget<URTUActionMenuWidget>(GetWorld(), ActionMenuWidget);

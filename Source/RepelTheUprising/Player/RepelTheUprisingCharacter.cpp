@@ -175,8 +175,6 @@ void ARepelTheUprisingCharacter::ToggleCrouch(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, (TEXT("Do Test Action called")));
-	HealthComp->RemoveSomeHealth();
 }
 
 void ARepelTheUprisingCharacter::SetReferences()

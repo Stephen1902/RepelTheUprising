@@ -39,6 +39,14 @@ void URTUStaminaComponent::StopSprint()
 }
 
 
+void URTUStaminaComponent::AdjustStamina(const float AmountToAdjust)
+{
+	if (AmountToAdjust != 0.f)
+	{
+		CurrentStamina += FMath::Clamp(CurrentStamina, 0.f, MaxStamina);
+	}
+}
+
 // Called when the game starts
 void URTUStaminaComponent::BeginPlay()
 {

@@ -45,6 +45,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSprintingChanged OnSprintingChanged;
 
+	UFUNCTION(BlueprintCallable, Category = "Stamina Component")
+	void AdjustStamina(const float AmountToAdjust);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

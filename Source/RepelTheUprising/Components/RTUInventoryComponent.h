@@ -84,6 +84,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Functions")
 	void Server_TransferSlots(int32 SourceIndex, URTUInventoryComponent* SourceInventory, int32 TargetIndex);
+
+	UFUNCTION(Server, Unreliable, Category="Functions")
+	void Server_ConsumeItem(FName INItemID);
 	
 	UFUNCTION(NetMulticast, reliable)
 	void UpdateInventory();
@@ -91,8 +94,6 @@ protected:
 	UFUNCTION(Client, WithValidation, Reliable, Category = "Functions")
 	void Client_Interact(AActor* ActorToInteractWith, AActor* InteractingActor);
 
-	UFUNCTION(Client, WithValidation, Reliable, Category = "Functions")
-	void Client_AddMessageWidget();
 private:
 	UPROPERTY()
 	ARepelTheUprisingCharacter* PlayerCharacterRef;
@@ -126,4 +127,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<URTU_DisplayMessage> DisplayMessageRef;
+
+	void AddMessageWidget();
+	void ConsumeItem(const int32 ItemIndex);
 };

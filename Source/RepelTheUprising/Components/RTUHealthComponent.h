@@ -8,7 +8,9 @@
 
 // OnHealthChanged event
 UDELEGATE(BlueprintAuthorityOnly)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, URTUHealthComponent*, OwningHealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, URTUHealthComponent*, OwningHealthComp, double, Health, double, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, double, MaxHealth);
 
 UCLASS( ClassGroup=(COOP), meta=(BlueprintSpawnableComponent) )
 class REPELTHEUPRISING_API URTUHealthComponent : public UActorComponent
@@ -23,34 +25,44 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
 	uint8 TeamNum;
 
-	void RemoveSomeHealth();
+	void AdjustHealth(const double AmountToAdjust);
+	void AdjustMaxHealth(const double AmountToAdjust);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UPROPERTY(ReplicatedUsing=OnRep_Health, BlueprintReadOnly, Category = "Health Component")
-	float Health;
+	double Health;
+
+	UPROPERTY(ReplicatedUsing=OnRep_MaxHealth, BlueprintReadOnly, Category = "Health Component")
+	double MaxHealth;
 
 	UFUNCTION()
-	void OnRep_Health(float OldHealth);
+	void OnRep_Health(double OldHealth);
+
+	UFUNCTION()
+	void OnRep_MaxHealth();
 
 	// Health the owner of this component starts with
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
-	float StartingHealth;
+	double StartingHealth;
 
 	UFUNCTION()
 	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 public:
 
-	float GetHealth() const;
+	double GetHealth() const;
 
 	bool GetIsDead() const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedSignature OnHealthChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnMaxHealthChangedSignature OnMaxHealthChanged;
+	
 	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
 	void Heal(float HealAmount);
 

@@ -14,7 +14,7 @@ URTUFoodComponent::URTUFoodComponent()
 
 	StartingFood = 100.f;
 	MaxFood = StartingFood;
-	Food = StartingFood;
+	Food = StartingFood - 10.f;
 	FoodDrainStandard = 0.01f;
 	FoodDrainExtra = 0.015f;
 	bUsingExtraEnergy = false;
@@ -45,6 +45,11 @@ void URTUFoodComponent::OnRep_Food(float OldFood)
 	OnFoodChanged.Broadcast(this, Food, NewFood);
 }
 
+void URTUFoodComponent::OnRep_MaxFood(float OldMaxFood)
+{
+	OnMaxFoodChanged.Broadcast(MaxFood);
+}
+
 // Called every frame
 void URTUFoodComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -72,7 +77,8 @@ void URTUFoodComponent::ConsumeFood(const float FoodAmount)
 		return;
 	}
 
-	Food = FMath::Clamp(Food + FoodAmount, 0.f, StartingFood);
+	Food = FMath::Clamp(Food + FoodAmount, 0.f, MaxFood);
+	UE_LOG(LogTemp, Warning, TEXT("Food is now %f"), Food);
 
 	OnFoodChanged.Broadcast(this, Food, -FoodAmount);
 }
@@ -87,4 +93,5 @@ void URTUFoodComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(URTUFoodComponent, Food);
+	DOREPLIFETIME(URTUFoodComponent, MaxFood);
 }

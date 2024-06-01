@@ -8,6 +8,9 @@
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnFoodChanged, URTUFoodComponent*, OwningFoodComp, float, HealthToChange, float, HealthDelta);
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxFoodChanged, float, MaxFood);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class REPELTHEUPRISING_API URTUFoodComponent : public UActorComponent
@@ -28,6 +31,13 @@ protected:
 	UFUNCTION()
 	void OnRep_Food(float OldFood);
 
+	UPROPERTY(ReplicatedUsing=OnRep_MaxFood, BlueprintReadOnly, Category = "Food Component")
+	float MaxFood;
+
+	UFUNCTION()
+	void OnRep_MaxFood(float OldMaxFood);
+
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Food Component")
 	float StartingFood;
 
@@ -48,11 +58,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnFoodChanged OnFoodChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnMaxFoodChanged OnMaxFoodChanged;
+
+	
 	UFUNCTION(BlueprintCallable, Category = "Food Component")
 	void ConsumeFood(const float FoodAmount);
 
 private:
-	float MaxFood;
 	bool bUsingExtraEnergy;
 
 	UFUNCTION()

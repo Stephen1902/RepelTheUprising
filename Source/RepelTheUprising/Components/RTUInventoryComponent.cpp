@@ -2,13 +2,17 @@
 
 
 #include "RTUInventoryComponent.h"
+
+#include "RTUFoodComponent.h"
+#include "RTUHealthComponent.h"
 #include "RTUItemComponent.h"
+#include "RTUStaminaComponent.h"
+#include "RTUWaterComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
-#include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 #include "RepelTheUprising/Widgets/RTU_DisplayMessage.h"
 
 #define InteractTrace ECC_GameTraceChannel2
@@ -42,7 +46,7 @@ void URTUInventoryComponent::BeginPlay()
 
 	SlotStruct.SetNum(InventorySlots);
 
-	Client_AddMessageWidget();
+	AddMessageWidget();
 }
 
 void URTUInventoryComponent::Server_DropItem_Implementation(FName ItemID, int32 Quantity)
@@ -149,9 +153,9 @@ void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWho
 		SlotStruct[ItemIndex].ItemID = FName("Default Name");
 		SlotStruct[ItemIndex].Quantity = 0;
 
-		if (Consume)
+		if (Consume && PlayerCharacterRef)
 		{
-			
+			Server_ConsumeItem(LocalItemID);
 		}
 		else
 		{
@@ -165,9 +169,9 @@ void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWho
 		SlotStruct[ItemIndex].Quantity = LocalQty;
 
 		// Check if one is being removed because we are consuming this
-		if (Consume)
+		if (Consume && PlayerCharacterRef)
 		{
-			
+			Server_ConsumeItem(LocalItemID);
 		}
 		else
 		{
@@ -354,28 +358,68 @@ bool URTUInventoryComponent::Server_TransferSlots_Validate(int32 SourceIndex,	UR
 	return SourceInventory != nullptr;
 }
 
-void URTUInventoryComponent::Client_AddMessageWidget_Implementation()
+void URTUInventoryComponent::AddMessageWidget()
 {
-	if (DisplayMessageWidget)
+	// Only the player needs to have a widget to display on screen
+	if (PlayerCharacterRef && DisplayMessageWidget)
 	{
-		if (PlayerCharacterRef)
+		APlayerController* OwningController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (OwningController)
 		{
-			APlayerController* OwningController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			if (OwningController)
+			DisplayMessageRef = CreateWidget<URTU_DisplayMessage>(OwningController, DisplayMessageWidget);
+			if (DisplayMessageRef)
 			{
-				DisplayMessageRef = CreateWidget<URTU_DisplayMessage>(OwningController, DisplayMessageWidget);
-				if (DisplayMessageRef)
-				{
-					DisplayMessageRef->AddToViewport();
-				}
+				DisplayMessageRef->AddToViewport();
 			}
 		}
 	}
 }
 
-bool URTUInventoryComponent::Client_AddMessageWidget_Validate()
+void URTUInventoryComponent::ConsumeItem(const int32 ItemIndex)
 {
-	return GetOwner() != nullptr;
+	FName LocalItemID = SlotStruct[ItemIndex].ItemID;
+	int32 LocalQty = SlotStruct[ItemIndex].Quantity;
+
+	Server_RemoveFromInventory(ItemIndex, false, true);
+}
+
+void URTUInventoryComponent::Server_ConsumeItem_Implementation(FName INItemID)
+{
+	if (const FItemInformationTable* ItemInfo = GetCurrentItemInfo(INItemID))
+	{
+		if (ItemInfo->OnConsumeStruct.EffectOnFood != 0.f)
+		{
+			if (URTUFoodComponent* FoodComp = Cast<URTUFoodComponent>( PlayerCharacterRef->GetComponentByClass(URTUFoodComponent::StaticClass())))
+			{
+				FoodComp->ConsumeFood(ItemInfo->OnConsumeStruct.EffectOnFood);
+			}
+		}
+		
+		if (ItemInfo->OnConsumeStruct.EffectOnThirst != 0.f)
+		{
+			if (URTUWaterComponent* WaterComp = Cast<URTUWaterComponent>( PlayerCharacterRef->GetComponentByClass(URTUWaterComponent::StaticClass())))
+			{
+				WaterComp->ConsumeWater(ItemInfo->OnConsumeStruct.EffectOnThirst);
+			}
+		}
+
+		if (ItemInfo->OnConsumeStruct.EffectOnStamina != 0.f)
+		{
+			if (URTUStaminaComponent* StaminaComp = Cast<URTUStaminaComponent>(PlayerCharacterRef->GetComponentByClass(URTUStaminaComponent::StaticClass())))
+			{
+				StaminaComp->AdjustStamina(ItemInfo->OnConsumeStruct.EffectOnStamina);
+			}
+		}
+
+		if (ItemInfo->OnConsumeStruct.EffectOnHealth != 0.f)
+		{
+			if (URTUHealthComponent* HealthComp = Cast<URTUHealthComponent>(PlayerCharacterRef->GetComponentByClass(URTUHealthComponent::StaticClass())))
+			{
+				HealthComp->Heal(ItemInfo->OnConsumeStruct.EffectOnHealth);
+			}
+		}
+	}	
+	
 }
 
 FItemInformationTable* URTUInventoryComponent::GetCurrentItemInfo(FName INItemID)

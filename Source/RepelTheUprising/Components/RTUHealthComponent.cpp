@@ -17,9 +17,17 @@ URTUHealthComponent::URTUHealthComponent()
 }
 
 
-void URTUHealthComponent::RemoveSomeHealth()
+void URTUHealthComponent::AdjustHealth(const double AmountToAdjust)
 {
-	Health -= 10.f;
+	if (AmountToAdjust != 0.f)
+	{
+		Health += FMath::Clamp(Health, 0.f, MaxHealth);
+	}
+}
+
+void URTUHealthComponent::AdjustMaxHealth(const double AmountToAdjust)
+{
+	MaxHealth += AmountToAdjust;
 }
 
 // Called when the game starts
@@ -39,14 +47,20 @@ void URTUHealthComponent::BeginPlay()
 	GameModeRef = Cast<ARepelTheUprisingGameMode>(GetWorld()->GetAuthGameMode());
 	
 	Health = StartingHealth;
+	MaxHealth = Health;
 }
 
 
-void URTUHealthComponent::OnRep_Health(float OldHealth)
+void URTUHealthComponent::OnRep_Health(double OldHealth)
 {
-	float Damage = Health - OldHealth;
+	const double Damage = Health - OldHealth;
 	
 	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
+}
+
+void URTUHealthComponent::OnRep_MaxHealth()
+{
+	OnMaxHealthChanged.Broadcast(MaxHealth);
 }
 
 
@@ -90,7 +104,7 @@ void URTUHealthComponent::Heal(float HealAmount)
 		return;
 	}
 
-	Health = FMath::Clamp(Health + HealAmount, 0.0f, StartingHealth);
+	Health = FMath::Clamp(Health + HealAmount, 0.0f, MaxHealth);
 
 	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s (+%s)"), *FString::SanitizeFloat(Health), *FString::SanitizeFloat(HealAmount));
 
@@ -153,7 +167,7 @@ bool URTUHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
 }
 
 
-float URTUHealthComponent::GetHealth() const
+double URTUHealthComponent::GetHealth() const
 {
 	return Health;
 }
@@ -169,4 +183,5 @@ void URTUHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(URTUHealthComponent, Health);
+	DOREPLIFETIME(URTUHealthComponent, MaxHealth);
 }
