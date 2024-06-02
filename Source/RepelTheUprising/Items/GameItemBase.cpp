@@ -11,7 +11,7 @@
 AGameItemBase::AGameItemBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Comp"));
 	SetRootComponent(SceneComponent);
@@ -22,7 +22,7 @@ AGameItemBase::AGameItemBase()
 
 	ItemComponent = CreateDefaultSubobject<URTUItemComponent>(TEXT("Item Component"));
 	
-	TextToReturn = FText::FromString("Default Name");
+	TextToReturn = FText::FromString("");
 	
 }
 
@@ -31,13 +31,6 @@ void AGameItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called every frame
-void AGameItemBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 FText AGameItemBase::LookAt_Implementation()
@@ -49,10 +42,28 @@ FText AGameItemBase::LookAt_Implementation()
 
 		if (FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(ItemID.RowName, ""))
 		{
-			const FString StringToReturn = "Pick up " + Row->ItemName.ToString();
+			FString StringToReturn = "Pick up ";
+			const int32 LocalQty = ItemComponent->GetQuantity();
+			if (LocalQty > 1)
+			{
+				StringToReturn += FString::FromInt(LocalQty) + " " += Row->ItemName.ToString() + "s";
+			}
+			else
+			{
+			  StringToReturn += Row->ItemName.ToString();	
+			}
+			
 			TextToReturn = FText::FromString(StringToReturn);
 		}
 	}
 	return TextToReturn;	
+}
+
+void AGameItemBase::SetItemInfo(const FName INItemID, const int32 InQuantity)
+{
+	if (INItemID != "" && InQuantity > 0)
+	{
+		ItemComponent->SetItemInfo(INItemID, InQuantity);
+	}
 }
 

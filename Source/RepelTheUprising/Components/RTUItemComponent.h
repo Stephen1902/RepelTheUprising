@@ -34,5 +34,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	FDataTableRowHandle GetItemID() const { return ItemID; }		
+	FDataTableRowHandle GetItemID() const { return ItemID; }
+	int32 GetQuantity() const { return Quantity; }
+
+	void SetItemInfo(const FName INItemID, const int32 InQuantity);
 };

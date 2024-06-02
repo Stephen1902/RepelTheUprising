@@ -12,6 +12,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
+#include "RepelTheUprising/Items/GameItemBase.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
 #include "RepelTheUprising/Widgets/RTU_DisplayMessage.h"
 
@@ -51,15 +52,21 @@ void URTUInventoryComponent::BeginPlay()
 
 void URTUInventoryComponent::Server_DropItem_Implementation(FName ItemID, int32 Quantity)
 {
-	for (int32 i = 0; i < Quantity; ++i)
+	if (FItemInformationTable* Row = GetCurrentItemInfo(ItemID))
 	{
-		if (FItemInformationTable* Row = GetCurrentItemInfo(ItemID))
+		FTransform NewTransform;
+		NewTransform.SetLocation(GetDropLocation());
+		NewTransform.SetRotation(FQuat(0.f, 0.f, UKismetMathLibrary::RandomIntegerInRange(0, 359), 0.f));
+		NewTransform.SetScale3D(FVector(1.f));
+		if (Quantity == 1)
 		{
-			FTransform NewTransform;
-			NewTransform.SetLocation(GetDropLocation());
-			NewTransform.SetRotation(FQuat(0.f, 0.f, UKismetMathLibrary::RandomIntegerInRange(0, 359), 0.f));
-			NewTransform.SetScale3D(FVector(1.f));
 			GetWorld()->SpawnActor<AActor>(Row->ActorOnDrop, NewTransform, FActorSpawnParameters());
+		}
+		else
+		{
+			Row = GetCurrentItemInfo("lootbag");
+			AGameItemBase* NewBase = GetWorld()->SpawnActor<AGameItemBase>(Row->ActorOnDrop, NewTransform, FActorSpawnParameters());
+			NewBase->SetItemInfo(ItemID, Quantity);	
 		}
 	}
 }
@@ -174,7 +181,7 @@ void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWho
 
 	if (RemoveWholeStack || LocalQty == 1)
 	{
-		SlotStruct[ItemIndex].ItemID = FName("Default Name");
+		SlotStruct[ItemIndex].ItemID = FName("");
 		SlotStruct[ItemIndex].Quantity = 0;
 
 		if (Consume && PlayerCharacterRef)

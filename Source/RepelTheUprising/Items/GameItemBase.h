@@ -33,9 +33,7 @@ protected:
 	class URTUItemComponent* ItemComponent;
 	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	virtual FText LookAt_Implementation() override;
 
+	void SetItemInfo(const FName INItemID, const int32 InQuantity);
 };

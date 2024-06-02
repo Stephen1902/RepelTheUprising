@@ -56,3 +56,9 @@ void URTUItemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
+void URTUItemComponent::SetItemInfo(const FName INItemID, const int32 InQuantity)
+{
+	ItemID.RowName = INItemID;
+	Quantity = InQuantity;	
+}
+

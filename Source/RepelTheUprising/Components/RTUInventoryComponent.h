@@ -41,6 +41,8 @@ public:
 
 	bool QueryInventory(FName INItemID, int32 QuantityRequired, int32& QuantityFound);
 	bool AddToInventory(FName ItemID, int32 Quantity, int32& QuantityRemaining);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void RemoveFromInventory(int32 ItemIndex, bool RemoveWholeStack, bool Consume);
 	void InteractWithItem();
 	bool TransferSlots(int32 SourceIndex, URTUInventoryComponent* SourceInventory, int32 TargetIndex);
