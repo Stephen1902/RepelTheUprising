@@ -20,5 +20,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn), Category = "Drag Drop Operations")
 	int32 ContentIndex;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn), Category = "Drag Drop Operations")
+	bool bRightMousePressed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn), Category = "Drag Drop Operations")
+	FName ItemID;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn), Category = "Drag Drop Operations")
+	int32 Quantity;
 };

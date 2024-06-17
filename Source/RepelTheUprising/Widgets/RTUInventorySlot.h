@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "RepelTheUprising/Framework/InteractInterface.h"
 #include "RTUInventorySlot.generated.h"
 
 class USizeBox;
@@ -14,13 +15,19 @@ class UImage;
 class UTextBlock;
 
 UCLASS()
-class REPELTHEUPRISING_API URTUInventorySlot : public UUserWidget
+class REPELTHEUPRISING_API URTUInventorySlot : public UUserWidget, public IInteractInterface
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Inventory Slot")
 	bool SetReferences(class URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory Slot")
 	void UpdateItemSlot() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory Slot")
+	FName GetItemID() const { return ItemID; }
 	
 protected:
 	virtual void NativeConstruct() override;
@@ -67,19 +74,30 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	FName ItemID = FName("");
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
 	int32 Quantity = -1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	int32 ContentIndex;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
+	bool bIsRightMouseButton = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Tables")
 	UDataTable* ItemTable;
 
+	UFUNCTION(BlueprintCallable, Category = "Functions")
+	void DealWithRightMouseDrop(FName InItemID, int32 InQuantity);
+	
 	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
 private:
 	UPROPERTY()
 	TObjectPtr<URTUActionMenuWidget> ActionMenuWidgetRef;
+
+	UFUNCTION()
+	void OnButtonHovered();
+	UFUNCTION()
+	void OnButtonUnhovered();
 };

@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	void InteractWith(class ARepelTheUprisingCharacter* CharacterWhoInteracted);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
+	void InventorySlotHovered(class URTUInventorySlot* SlotBeingHovered);
 };

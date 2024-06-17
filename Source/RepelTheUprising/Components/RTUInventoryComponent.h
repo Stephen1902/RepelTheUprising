@@ -56,6 +56,13 @@ public:
 	UFUNCTION(Server, Unreliable, Category="Functions")
 	void Server_RemoveFromInventory(int32 ItemIndexIN, bool RemoveWholeStackIN, bool ConsumeIN);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int32 GetHalfOfQuantity(const int32 QuantityIn, const int32 IndexToChange);
+
+	FName GetIDAtIndex(const int32 IndexToCheck);
+	void CreateNewStack(int32 ItemIndex, FName ItemID, int32 QuantityToAdd);
+	void AddToStack(int32 IndexToAddTo, int32 QuantityToAdd);
+
 protected:
 	// Called on game start
 	virtual void BeginPlay() override;
@@ -91,11 +98,14 @@ protected:
 	UFUNCTION(Server, Unreliable, Category="Functions")
 	void Server_ConsumeItem(FName INItemID);
 	
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(BlueprintCallable, NetMulticast, reliable)
 	void UpdateInventory();
 
 	UFUNCTION(Client, WithValidation, Reliable, Category = "Functions")
 	void Client_Interact(AActor* ActorToInteractWith, AActor* InteractingActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Functions")
+	void SpawnLootBag(const FName INItemID, const int32 INQuantity);
 
 private:
 	UPROPERTY()
@@ -118,8 +128,6 @@ private:
 	int32 HasEmptySlot();
 
 	int32 GetMaxStackSize(FName ItemID);
-	void CreateNewStack(int32 ItemIndex, FName ItemID, int32 QuantityToAdd);
-	void AddToStack(int32 IndexToAddTo, int32 QuantityToAdd);
 
 	//  DEBUG ONLY - REMOVE
 	void DEBUG();

@@ -6,6 +6,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "RepelTheUprising/Framework/InteractInterface.h"
 #include "RepelTheUprisingCharacter.generated.h"
 
 class UInputComponent;
@@ -18,7 +19,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class ARepelTheUprisingCharacter : public ACharacter
+class ARepelTheUprisingCharacter : public ACharacter, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -61,10 +62,23 @@ class ARepelTheUprisingCharacter : public ACharacter
 	/** Player Menu Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* PlayerMenuAction;
-	
 
-	
+	/** Standard Action Input */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* StandardAction;
 
+	/** Alternate Action Input */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* AlternateAction;
+
+	/* Standard Drag Action Input */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* StandardDragAction;
+
+	/* Alternate Drag Action Input */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* AlternateDragAction;
+	
 	/** Test Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* TestAction;
@@ -100,6 +114,13 @@ protected:
 	/** Called for test action events */
 	void DoTestAction(const FInputActionValue& Value);
 
+	/** Called for player action events */
+	void StandardActionInGame(const FInputActionValue& Value);
+	void AlternateActionInGame(const FInputActionValue& Value);
+	void DragStandardHUD(const FInputActionValue& Value);
+	void DragAlternateHUD(const FInputActionValue& Value);
+	void StandardActionHUD(const FInputActionValue& Value);
+
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	URTUInventoryComponent* InventoryComp;
@@ -131,10 +152,15 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	UFUNCTION()
+	void DealWithHoveredSlot(URTUInventorySlot* InventorySlotIn);
+
+
 private:
 	bool bIsCrouching;
-	bool bInventoryIsShowing = false;
 	bool bHUDIsShowing = false;
+	bool bInventoryIsShowing = false;
+	bool bIsDragging = false;
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
@@ -147,6 +173,8 @@ private:
 	FTimerHandle ReferenceDelayHandle;
 	void ChangeInputToUI();
 	void ChangeInputToGame();
-	
+
+	UPROPERTY()
+	URTUInventorySlot* CurrentSlot; 
 };
 

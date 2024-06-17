@@ -2,15 +2,18 @@
 
 #include "RTUInventorySlot.h"
 
+#include "InterchangeResult.h"
 #include "RTUActionMenuWidget.h"
-#include "RTUDragDropWidget.h"
-#include "Blueprint/UserWidgetBlueprint.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "RepelTheUprising/Components/RTUInventoryComponent.h"
+#include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 
 bool URTUInventorySlot::SetReferences(URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex)
 {
@@ -74,22 +77,43 @@ void URTUInventorySlot::UpdateItemSlot() const
 void URTUInventorySlot::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
+	SlotButton->OnHovered.AddDynamic(this, &URTUInventorySlot::OnButtonHovered);
+	SlotButton->OnUnhovered.AddDynamic(this, &URTUInventorySlot::OnButtonUnhovered);
+}
+
+void URTUInventorySlot::DealWithRightMouseDrop(FName InItemID, int32 InQuantity)
+{
+	if (InventoryCompRef)
+	{
+		if (InventoryCompRef->GetIDAtIndex(ContentIndex) == InItemID)
+		{
+			InventoryCompRef->AddToStack(ContentIndex, InQuantity);
+		}
+		else
+		{
+			InventoryCompRef->CreateNewStack(ContentIndex, InItemID, InQuantity);
+		}
+	}
 }
 
 FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	// Only do something with this if the ItemID is not set to the default;
-	if (ItemID != FName("Default Name"))
+/*	if (ItemID != FName("Default Name"))
 	{
 		if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
 		{
+			bIsRightMouseButton = false;
 			FEventReply ReplyResult = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 			return ReplyResult.NativeReply;			
 		}
 		
 		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton) && Quantity > 0)
 		{
+			bIsRightMouseButton = true;
+			FEventReply ReplyResult = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::RightMouseButton);
+			return ReplyResult.NativeReply;	
 			if (ActionMenuWidget)
 			{
 				// If an existing menu is already on screen, remove it
@@ -103,9 +127,10 @@ FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 				ActionMenuWidgetRef->SetReferences(InventoryCompRef, ContentIndex);
 				ActionMenuWidgetRef->AddToViewport();
 				return FReply::Handled();
+				
 			}
 		}
-	}
+	}*/
 	return FReply::Unhandled();
 }
 
@@ -114,4 +139,14 @@ void URTUInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const 
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
 	
+}
+
+void URTUInventorySlot::OnButtonHovered()
+{
+	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), this);
+}
+
+void URTUInventorySlot::OnButtonUnhovered()
+{
+	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), nullptr);
 }

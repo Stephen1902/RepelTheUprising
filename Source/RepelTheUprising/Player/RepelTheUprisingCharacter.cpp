@@ -13,6 +13,7 @@
 #include "../Components/RTUStaminaComponent.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
+#include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -61,7 +62,9 @@ void ARepelTheUprisingCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	// The code is too fast for the object being referenced to be fully created.  Wait before setting references.
 	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetReferences, 0.5f, false, 0.5f);
+
 /*
 	if (PlayerHUDWidget)
 	{
@@ -105,7 +108,15 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 
 		// Player Menu
 		EnhancedInputComponent->BindAction(PlayerMenuAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::TogglePlayerWidget);
-		
+
+		// Actions
+		EnhancedInputComponent->BindAction(StandardAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::StandardActionInGame);
+		EnhancedInputComponent->BindAction(StandardAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::StandardActionHUD);
+		EnhancedInputComponent->BindAction(AlternateAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::AlternateActionInGame);
+
+		// Dragging
+		EnhancedInputComponent->BindAction(StandardDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragStandardHUD);
+		EnhancedInputComponent->BindAction(AlternateDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragAlternateHUD);
 
 		// Test Action
 		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::DoTestAction);
@@ -175,6 +186,52 @@ void ARepelTheUprisingCharacter::ToggleCrouch(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
 {
+	
+}
+
+void ARepelTheUprisingCharacter::StandardActionInGame(const FInputActionValue& Value)
+{
+	// These events only occur when the player HUD is not on screen 
+	if (!bInventoryIsShowing && !bHUDIsShowing)
+	{
+		
+	}
+}
+
+void ARepelTheUprisingCharacter::AlternateActionInGame(const FInputActionValue& Value)
+{
+	// These events only occur when the player HUD is not on screen 
+	if (!bInventoryIsShowing && !bHUDIsShowing)
+	{
+		
+	}
+}
+
+void ARepelTheUprisingCharacter::DragStandardHUD(const FInputActionValue& Value)
+{
+	// Dragging can only happen when the player's HUD is on screen
+	if (bInventoryIsShowing || bHUDIsShowing)
+	{
+		
+	}
+}
+
+void ARepelTheUprisingCharacter::DragAlternateHUD(const FInputActionValue& Value)
+{
+	// Dragging can only happen when the player's HUD is on screen
+	if (bInventoryIsShowing || bHUDIsShowing)
+	{
+		
+	}
+}
+
+void ARepelTheUprisingCharacter::StandardActionHUD(const FInputActionValue& Value)
+{
+	// If the player is not dragging something, show the information for this item
+	if (!bIsDragging)
+	{
+		
+	}
 }
 
 void ARepelTheUprisingCharacter::SetReferences()
@@ -239,8 +296,7 @@ void ARepelTheUprisingCharacter::ChangeInputToUI()
 			if (MenuInputMapping)
 			{
 				InputSystem->RemoveMappingContext(DefaultInputMapping);
-				InputSystem->AddMappingContext(MenuInputMapping, 0);
-				UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
+				InputSystem->AddMappingContext(MenuInputMapping, 99);
 			}
 		}
 
@@ -258,12 +314,26 @@ void ARepelTheUprisingCharacter::ChangeInputToGame()
  			{
  				InputSystem->RemoveMappingContext(MenuInputMapping);
  				InputSystem->AddMappingContext(DefaultInputMapping, 0);
- 				UE_LOG(LogTemp, Warning, TEXT("New input mapping set"));
  			}
  		}
  
  		PC->SetShowMouseCursor(false);
  	}
+}
+
+void ARepelTheUprisingCharacter::DealWithHoveredSlot(URTUInventorySlot* InventorySlotIn)
+{
+	CurrentSlot = InventorySlotIn;
+	if (CurrentSlot != nullptr)
+	{
+		const FName CurrentID = InventorySlotIn->GetItemID();
+		UE_LOG(LogTemp, Warning, TEXT("ItemID from %s is %s"), *InventorySlotIn->GetName(), *CurrentID.ToString());
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Deal with Hovered slot was called without a valid Inventory Slot"));
+	}
 }
 
 void ARepelTheUprisingCharacter::AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToCreate, URTUInventoryComponent* ContainerInventory)

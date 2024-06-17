@@ -14,6 +14,7 @@
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "RepelTheUprising/Items/GameItemBase.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
+#include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprising/Widgets/RTU_DisplayMessage.h"
 
 #define InteractTrace ECC_GameTraceChannel2
@@ -36,6 +37,22 @@ URTUInventoryComponent::URTUInventoryComponent()
 	InteractionRange = 300.f;
 	
 	SetIsReplicatedByDefault(true);
+}
+
+int32 URTUInventoryComponent::GetHalfOfQuantity(const int32 QuantityIn, const int32 IndexToChange )
+{
+	// Check if the quantity is divisible by 2
+	if (QuantityIn % 2 == 0)
+	{
+		SlotStruct[IndexToChange].Quantity = QuantityIn / 2;
+		UpdateInventory();
+		return QuantityIn / 2;
+	}
+
+	// Leave an extra one in the inventory when taking "half"
+	SlotStruct[IndexToChange].Quantity = (QuantityIn + 1) / 2;
+	UpdateInventory();
+	return (QuantityIn - 1) / 2;
 }
 
 void URTUInventoryComponent::BeginPlay()
@@ -64,9 +81,7 @@ void URTUInventoryComponent::Server_DropItem_Implementation(FName ItemID, int32 
 		}
 		else
 		{
-			Row = GetCurrentItemInfo("lootbag");
-			AGameItemBase* NewBase = GetWorld()->SpawnActor<AGameItemBase>(Row->ActorOnDrop, NewTransform, FActorSpawnParameters());
-			NewBase->SetItemInfo(ItemID, Quantity);	
+			SpawnLootBag(ItemID, Quantity);
 		}
 	}
 }
@@ -76,8 +91,7 @@ void URTUInventoryComponent::Server_RemoveFromInventory_Implementation(int32 Ite
 	RemoveFromInventory(ItemIndexIN, RemoveWholeStackIN, ConsumeIN);
 }
 
-void URTUInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                           FActorComponentTickFunction* ThisTickFunction)
+void URTUInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -257,15 +271,23 @@ int32 URTUInventoryComponent::GetMaxStackSize(FName ItemID)
 
 void URTUInventoryComponent::AddToStack(int32 Index, int32 QuantityToAdd)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Adding To Stack"))
 	if (QuantityToAdd > 0)
 	{
 		SlotStruct[Index].Quantity += QuantityToAdd;
+		UpdateInventory();
 	}
 }
 
 void URTUInventoryComponent::CreateNewStack(int32 FoundSlot, FName ItemID, int32 QuantityToAdd)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("FoundSlot: %i, ItemID: %s, QtyToAdd: %i"), FoundSlot, *ItemID.ToString(), QuantityToAdd);
+	if (QuantityToAdd > 0)
+	{
+		SlotStruct[FoundSlot].ItemID = ItemID;
+		SlotStruct[FoundSlot].Quantity = QuantityToAdd;
+		UpdateInventory();
+	}
 }
 
 void URTUInventoryComponent::InteractWithItem()
@@ -450,7 +472,30 @@ void URTUInventoryComponent::Server_ConsumeItem_Implementation(FName INItemID)
 			}
 		}
 	}	
-	
+}
+
+void URTUInventoryComponent::SpawnLootBag(const FName INItemID, const int32 INQuantity)
+{
+	if (FItemInformationTable* Row = GetCurrentItemInfo("lootbag"))
+	{
+		FTransform NewTransform;
+		NewTransform.SetLocation(GetDropLocation());
+		NewTransform.SetRotation(FQuat(0.f, 0.f, UKismetMathLibrary::RandomIntegerInRange(0, 359), 0.f));
+		NewTransform.SetScale3D(FVector(1.f));
+		
+		AGameItemBase* NewBase = GetWorld()->SpawnActor<AGameItemBase>(Row->ActorOnDrop, NewTransform, FActorSpawnParameters());
+		NewBase->SetItemInfo(INItemID, INQuantity);
+	}
+}
+
+FName URTUInventoryComponent::GetIDAtIndex(const int32 IndexToCheck)
+{
+	if (IndexToCheck > -1)
+	{
+		return SlotStruct[IndexToCheck].ItemID;
+	}
+
+	return FName("");
 }
 
 FItemInformationTable* URTUInventoryComponent::GetCurrentItemInfo(FName INItemID)
