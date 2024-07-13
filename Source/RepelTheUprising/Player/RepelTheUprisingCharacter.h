@@ -183,6 +183,9 @@ private:
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
+	UPROPERTY()
+	APlayerController* PlayerControllerRef;
+	
 	void SetReferences();
 
 	void InteractWith();

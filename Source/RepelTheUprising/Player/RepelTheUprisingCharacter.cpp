@@ -147,7 +147,15 @@ void ARepelTheUprisingCharacter::Tick(float DeltaSeconds)
 			//DealWithPressedButton(false);
 		}
 	}
-
+/*	
+	if (bIsDragging)
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			PC->SetShowMouseCursor(true);
+		}
+	}
+*/
 }
 
 void ARepelTheUprisingCharacter::Move(const FInputActionValue& Value)
@@ -281,7 +289,6 @@ void ARepelTheUprisingCharacter::StandardActionHUD(const FInputActionValue& Valu
 
 void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AlternateActionHUD called"));
 	// Alternate action in the HUD only happens when the player is dragging
 	if (bIsDragging)
 	{
@@ -292,9 +299,8 @@ void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Val
 				if (DraggedSlot->GetQuantity() > 1)
 				{
 					CurrentSlot->DealWithMouseDrop(DraggedSlot->GetItemID(), 1);
-					const FName LocalItemID = DraggedSlot->GetItemID();
 					const int32 LocalQty = DraggedSlot->GetQuantity() - 1;
-					DraggedSlot->SetInformation(LocalItemID, LocalQty);
+					DraggedSlot->SetInformation(DraggedSlot->GetItemID(), LocalQty);
 				}
 				else
 				{
@@ -307,17 +313,6 @@ void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Val
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("DraggedSlot is not valid"));
-			}
-		}
-		else
-		{
-			if (CurrentSlot)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Check HUD"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Check CurrentSlot"));
 			}
 		}
 	}
@@ -334,6 +329,12 @@ void ARepelTheUprisingCharacter::SetReferences()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
 	}
+
+	PlayerControllerRef = Cast<APlayerController>(GetController());
+	if (!PlayerControllerRef)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Player Controller Ref"), *GetName());
+	}
 }
 
 void ARepelTheUprisingCharacter::InteractWith()
@@ -341,7 +342,6 @@ void ARepelTheUprisingCharacter::InteractWith()
 	if (bHUDIsShowing)
 	{
 		ChangeInputToGame();
-		//PlayerWidgetRef->RemoveCurrentWidget();
 		PlayerWidgetRef->SetVisibility(ESlateVisibility::Hidden);
 		bHUDIsShowing = false;
 	}
@@ -358,7 +358,6 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 		// Check if an existing HUD, container, trader inventory etc. is already on screen
 		if (bHUDIsShowing)
 		{
-			//PlayerWidgetRef->RemoveCurrentWidget();
 			PlayerWidgetRef->RemoveAllWidgets();
 			bHUDIsShowing = false;
 			ChangeInputToGame();
@@ -369,20 +368,6 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 			bHUDIsShowing = true;
 			ChangeInputToUI();
 		}
-/*		
-		if (!bInventoryIsShowing)
-		{
-				ChangeInputToUI();
-				PlayerWidgetRef->AddInventoryToHUD();
-				bInventoryIsShowing = true;
-		}
-		else
-		{
-				ChangeInputToGame();
-				PlayerWidgetRef->RemoveCurrentWidget();
-				bInventoryIsShowing = false;
-			}
-*/
 	}
 	else
 	{
@@ -392,9 +377,9 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 
 void ARepelTheUprisingCharacter::ChangeInputToUI()
 {
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (PlayerControllerRef)
 	{
-		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControllerRef->GetLocalPlayer());
 		{
 			if (MenuInputMapping && HUDInputMapping)
 			{
@@ -404,8 +389,12 @@ void ARepelTheUprisingCharacter::ChangeInputToUI()
 			}
 		}
 
-		PC->SetShowMouseCursor(true);
-		PC->SetInputMode(FInputModeGameAndUI());
+		PlayerControllerRef->SetShowMouseCursor(true);
+		
+		FInputModeGameAndUI InputModeData;
+		InputModeData.SetHideCursorDuringCapture(false);  // This line makes sure that the mouse cursor doesn't disappear on right click
+		PlayerControllerRef->SetInputMode(InputModeData);
+
 	}
 }
 
@@ -421,9 +410,9 @@ void ARepelTheUprisingCharacter::ChangeInputToGame()
 		bIsDragging = false;
 	}
 		
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (PlayerControllerRef)
  	{
- 		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+ 		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControllerRef->GetLocalPlayer());
  		{
  			if (HUDInputMapping && MenuInputMapping)
  			{
@@ -433,19 +422,13 @@ void ARepelTheUprisingCharacter::ChangeInputToGame()
  			}
  		}
  
- 		PC->SetShowMouseCursor(false);
-		PC->SetInputMode(FInputModeGameOnly());
+ 		PlayerControllerRef->SetShowMouseCursor(false);
+		PlayerControllerRef->SetInputMode(FInputModeGameOnly());
  	}
 }
 
 void ARepelTheUprisingCharacter::DealWithHoveredSlot(URTUInventorySlot* InventorySlotIn)
 {
-	// Check if there is an existing slot, tell it that is can no longer be focused 
-	if (CurrentSlot != nullptr)
-	{
-		//CurrentSlot->SetIsFocusable(false);
-	}
-
 	CurrentSlot = InventorySlotIn;
 	
 	if (CurrentSlot != nullptr)
@@ -481,16 +464,9 @@ void ARepelTheUprisingCharacter::DealWithPressedButton(const bool bNewPressedSta
 		if (CurrentSlot)
 		{
 			CurrentSlot->DealWithMouseDrop(*DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity());
-			//UE_LOG(LogTemp, Warning, TEXT("ItemID: %s, Quantity: %i"), *DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity());
-			//CurrentSlot->GetInventorySlotStruct().InventoryCompRef->AddToInventory(*DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity(), LocalQtyRemaining);
-			//LocalSlotStruct.InventoryCompRef->AddToInventory(LocalSlotStruct.ItemID, LocalSlotStruct.Quantity, LocalQtyRemaining);
-			//if (LocalQtyRemaining <= 0)
-			{
-				DraggedSlot->RemoveFromParent();
-				DraggedSlot = nullptr;
-			}
+			DraggedSlot->RemoveFromParent();
+			DraggedSlot = nullptr;
 		}
-
 	}
 	else
 	{
@@ -531,10 +507,6 @@ void ARepelTheUprisingCharacter::DealWithPressedButton(const bool bNewPressedSta
 				
 				bIsDraggingLeft = false;
 				bIsDraggingRight = false;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Trying to drag.  InventoryCompRef is %s"), LocalSlotStruct.InventoryCompRef != nullptr ? TEXT("valid") : TEXT("nullptr"));
 			}
 		}
 	}
