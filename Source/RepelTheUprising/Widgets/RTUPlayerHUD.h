@@ -20,6 +20,7 @@ class REPELTHEUPRISING_API URTUPlayerHUD : public UUserWidget
 
 public:
 	void AddInventoryToHUD();
+	void RemoveAllWidgets();
 	void AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToDisplay, URTUInventoryComponent* ContainerInventory, URTUInventoryComponent* PlayerInventory);
 	void RemoveCurrentWidget();
 protected:
@@ -34,5 +35,8 @@ protected:
 	TSubclassOf<UUserWidget> ContainerWidget;
 private:
 	UPROPERTY()
-	TObjectPtr<UUserWidget> CurrentWidgetRef;
+	TObjectPtr<UUserWidget> PlayerWidgetRef;
+
+	UPROPERTY()
+	TObjectPtr<URTUContainerWidget> ContainerWidgetRef;
 };

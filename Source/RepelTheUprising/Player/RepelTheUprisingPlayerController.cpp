@@ -6,6 +6,14 @@
 #include "RepelTheUprisingCharacter.h"
 #include "Engine/LocalPlayer.h"
 
+void ARepelTheUprisingPlayerController::ClearPlayerHUD()
+{
+	if (ARepelTheUprisingCharacter* ControlledChar = Cast<ARepelTheUprisingCharacter>(GetCharacter()))
+	{
+		ControlledChar->ChangeInputToGame();
+	}
+}
+
 void ARepelTheUprisingPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,12 +28,23 @@ void ARepelTheUprisingPlayerController::BeginPlay()
 
 void ARepelTheUprisingPlayerController::InventorySlotHovered_Implementation(URTUInventorySlot* InventorySlotIn)
 {
-	if (InventorySlotIn != nullptr)
+	if (ARepelTheUprisingCharacter* ControlledChar = Cast<ARepelTheUprisingCharacter>(GetCharacter()))
 	{
-		if (ARepelTheUprisingCharacter* ControlledChar = Cast<ARepelTheUprisingCharacter>(GetCharacter()))
+		if (InventorySlotIn != nullptr)
 		{
 			ControlledChar->DealWithHoveredSlot(InventorySlotIn);
 		}
+		else
+		{
+			ControlledChar->DealWithHoveredSlot(nullptr);			
+		}
 	}
+}
 
+void ARepelTheUprisingPlayerController::InventoryButtonPressed_Implementation(bool NewPressedState)
+{
+	if (ARepelTheUprisingCharacter* ControlledChar = Cast<ARepelTheUprisingCharacter>(GetCharacter()))
+	{
+		ControlledChar->DealWithPressedButton(NewPressedState);
+	}
 }

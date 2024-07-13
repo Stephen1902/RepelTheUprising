@@ -2,8 +2,10 @@
 
 #include "RTUInventoryWidget.h"
 #include "RTUInventoryGrid.h"
+#include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
+#include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 
 void URTUInventoryWidget::NativeConstruct()
 {
@@ -22,6 +24,8 @@ void URTUInventoryWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to get either PlayerChar or InventoryComponentRef in URTUInventoryWidget"));
 	}
+
+	PlayerButton->OnHovered.AddDynamic(this, &URTUInventoryWidget::DealWithHoveredButton);
 }
 
 void URTUInventoryWidget::NativeDestruct()
@@ -35,6 +39,11 @@ void URTUInventoryWidget::NativeDestruct()
 		PC->SetInputMode(FInputModeGameOnly());
 		PC->SetShowMouseCursor(false);
 	}
+}
+
+void URTUInventoryWidget::DealWithHoveredButton()
+{
+	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), nullptr);
 }
 
 void URTUInventoryWidget::SetReferences(URTUInventoryComponent* InventoryComponentIN)

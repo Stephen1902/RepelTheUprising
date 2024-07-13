@@ -30,4 +30,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	void InventorySlotHovered(class URTUInventorySlot* SlotBeingHovered);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
+	void InventoryButtonPressed(bool NewPressedState);
 };

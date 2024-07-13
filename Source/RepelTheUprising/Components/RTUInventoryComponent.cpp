@@ -108,7 +108,7 @@ void URTUInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 bool URTUInventoryComponent::QueryInventory(FName INItemID, int32 QuantityRequired, int32& QuantityFound)
 {
-	if (INItemID != FName("Default Name"))
+	if (INItemID != FName(""))
 	{
 		int32 LocalQtyFound = 0;
 
@@ -197,7 +197,7 @@ void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWho
 	{
 		SlotStruct[ItemIndex].ItemID = FName("");
 		SlotStruct[ItemIndex].Quantity = 0;
-
+/*
 		if (Consume && PlayerCharacterRef)
 		{
 			Server_ConsumeItem(LocalItemID);
@@ -205,23 +205,23 @@ void URTUInventoryComponent::RemoveFromInventory(int32 ItemIndex, bool RemoveWho
 		else
 		{
 			Server_DropItem(LocalItemID, LocalQty);
-		}
+		}*/
 	}
 	else
 	{
-		// We are only removing one from the stack
-		LocalQty -= 1;
+		// We are going to remove one from the stack
+		LocalQty -= GetHalfOfQuantity(LocalQty, ItemIndex);
 		SlotStruct[ItemIndex].Quantity = LocalQty;
 
 		// Check if one is being removed because we are consuming this
 		if (Consume && PlayerCharacterRef)
 		{
-			Server_ConsumeItem(LocalItemID);
+			//Server_ConsumeItem(LocalItemID);
 		}
 		else
 		{
 			// Otherwise, the item is to be dropped into the world
-			Server_DropItem(LocalItemID, 1);	
+			//Server_DropItem(LocalItemID, 1);	
 		}
 	}
 
@@ -277,6 +277,16 @@ void URTUInventoryComponent::AddToStack(int32 Index, int32 QuantityToAdd)
 		SlotStruct[Index].Quantity += QuantityToAdd;
 		UpdateInventory();
 	}
+}
+
+int32 URTUInventoryComponent::AddToSpecificSlot(const FString* SlotNameToCheck)
+{
+	for (int32 i = 0; i < SlotStruct.Num(); ++i)
+	{
+		
+	}
+	
+	return -1;
 }
 
 void URTUInventoryComponent::CreateNewStack(int32 FoundSlot, FName ItemID, int32 QuantityToAdd)

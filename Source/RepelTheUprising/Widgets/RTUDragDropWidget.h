@@ -15,9 +15,14 @@ class REPELTHEUPRISING_API URTUDragDropWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetItemID(const FName INItemID);
-
+	void SetInformation(const FName INItemID, const int32 INQuantity);
+	//void GetInformation() { FName& OUTItemID = FName(""), int32& OUTQuantity};
+	FName GetItemID() const { return ItemID; }
+	int32 GetQuantity() const { return Quantity; }
 protected:
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<class UCanvasPanel> DDCanvasPanel;
+	
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<class USizeBox> DDSizeBox;
 
@@ -25,7 +30,22 @@ protected:
 	TObjectPtr<class UBorder> DDBorder;
 
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<class UOverlay> DDOverlay;
+	
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<class UImage> DDImage;
+
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<USizeBox> DDQtySizeBox;
+
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UBorder> DDQtyOuterBorder;
+
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UBorder> DDQtyInnerBorder;
+
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<class UTextBlock> DDQtyTextBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drag Drop")
 	TObjectPtr<UDataTable> ItemInfoTable;
@@ -35,4 +55,11 @@ protected:
 
 private:
 	virtual void NativeConstruct() override;
+
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> OwningController;
+
+	int32 Quantity;
 };

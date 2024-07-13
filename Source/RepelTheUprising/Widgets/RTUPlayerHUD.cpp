@@ -8,31 +8,54 @@ void URTUPlayerHUD::AddInventoryToHUD()
 {
 	if (InventoryWidget)
 	{
-		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), InventoryWidget);
-		CurrentWidgetRef->AddToViewport();
-		CurrentWidgetRef->SetFocus();
+		if (PlayerWidgetRef == nullptr)
+		{
+			PlayerWidgetRef = CreateWidget(GetOwningPlayer(), InventoryWidget);
+			PlayerWidgetRef->AddToViewport();
+		}
+		else
+		{
+			PlayerWidgetRef->SetVisibility(ESlateVisibility::Visible);
+		}
+		//CurrentWidgetRef->SetFocus();
 	}
+}
+
+void URTUPlayerHUD::RemoveAllWidgets()
+{
+	if (PlayerWidgetRef)
+	{
+		PlayerWidgetRef->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ContainerWidgetRef)
+	{
+		ContainerWidgetRef->RemoveFromParent();
+		ContainerWidgetRef = nullptr;
+	}
+	
 }
 
 void URTUPlayerHUD::AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToDisplay, URTUInventoryComponent* ContainerInventory, URTUInventoryComponent* PlayerInventory)
 {
-	if (WidgetToDisplay)
+	if (WidgetToDisplay && ContainerWidgetRef == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Valid widget passed to Player HUD"));
-		CurrentWidgetRef = CreateWidget(GetOwningPlayer(), WidgetToDisplay);
-		CurrentWidgetRef->AddToViewport();
-		URTUContainerWidget* ContainerWidgetRef = Cast<URTUContainerWidget>(CurrentWidgetRef);
+		ContainerWidgetRef = CreateWidget<URTUContainerWidget>(GetOwningPlayer(), WidgetToDisplay);
+		ContainerWidgetRef->AddToViewport();
 		ContainerWidgetRef->SetInventoryComp(ContainerInventory, PlayerInventory);
-		CurrentWidgetRef->SetFocus();		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Container Widget REF is %s"), ContainerWidgetRef == nullptr? TEXT("nullptr") : TEXT("Valid"));
 	}
 }
 
 void URTUPlayerHUD::RemoveCurrentWidget()
 {
-	if (CurrentWidgetRef != nullptr)
+	if (PlayerWidgetRef != nullptr)
 	{
-		CurrentWidgetRef->RemoveFromParent();
-		CurrentWidgetRef = nullptr;
+		PlayerWidgetRef->SetVisibility(ESlateVisibility::Hidden);
+		//CurrentWidgetRef = nullptr;
 	}
 }
 

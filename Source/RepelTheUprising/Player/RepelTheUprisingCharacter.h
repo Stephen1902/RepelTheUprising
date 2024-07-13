@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "RepelTheUprising/Framework/InteractInterface.h"
+#include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprisingCharacter.generated.h"
 
 class UInputComponent;
@@ -15,6 +16,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
+struct FInventorySlotStruct;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -88,6 +90,9 @@ public:
 	class URTUInventoryComponent* GetInventoryComp() const { return InventoryComp; }
 
 	void AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToCreate, URTUInventoryComponent* ContainerInventory);
+	void DealWithPressedButton(bool bNewPressedState);
+	void ChangeInputToGame();
+
 
 protected:
 	virtual void BeginPlay();
@@ -97,6 +102,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputMappingContext* MenuInputMapping;
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputMappingContext* HUDInputMapping;
+
 	
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -120,6 +129,7 @@ protected:
 	void DragStandardHUD(const FInputActionValue& Value);
 	void DragAlternateHUD(const FInputActionValue& Value);
 	void StandardActionHUD(const FInputActionValue& Value);
+	void AlternateActionHUD(const FInputActionValue& Value);
 
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
@@ -142,9 +152,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	URTUPlayerHUD* PlayerWidgetRef;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class URTUDragDropWidget> DraggedWidget;
+	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	/** Returns Mesh1P subobject **/
@@ -160,7 +175,11 @@ private:
 	bool bIsCrouching;
 	bool bHUDIsShowing = false;
 	bool bInventoryIsShowing = false;
+	bool bIsDraggingLeft = false;
+	bool bIsDraggingRight = false;
 	bool bIsDragging = false;
+	bool bInventoryButtonPressed = false;
+	double TimePressed = 0.f;
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
@@ -172,9 +191,12 @@ private:
 	
 	FTimerHandle ReferenceDelayHandle;
 	void ChangeInputToUI();
-	void ChangeInputToGame();
 
 	UPROPERTY()
-	URTUInventorySlot* CurrentSlot; 
+	URTUInventorySlot* CurrentSlot;
+	UPROPERTY()
+	URTUDragDropWidget* DraggedSlot;
+	UPROPERTY()
+	FInventorySlotStruct LocalSlotStruct;
 };
 

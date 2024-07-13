@@ -14,6 +14,7 @@
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Widgets/RTUInventorySlot.h"
+#include "RepelTheUprising/Widgets/RTUDragDropWidget.h"
 #include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -23,6 +24,9 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 {
+	// Sets whether this actor can ever tick.  Turn it off to improve performance
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
@@ -113,7 +117,8 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		EnhancedInputComponent->BindAction(StandardAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::StandardActionInGame);
 		EnhancedInputComponent->BindAction(StandardAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::StandardActionHUD);
 		EnhancedInputComponent->BindAction(AlternateAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::AlternateActionInGame);
-
+		EnhancedInputComponent->BindAction(AlternateAction, ETriggerEvent::Completed, this, &ARepelTheUprisingCharacter::AlternateActionHUD);
+		
 		// Dragging
 		EnhancedInputComponent->BindAction(StandardDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragStandardHUD);
 		EnhancedInputComponent->BindAction(AlternateDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragAlternateHUD);
@@ -125,6 +130,24 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void ARepelTheUprisingCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bInventoryButtonPressed)
+	{
+		TimePressed += DeltaSeconds;
+		if (TimePressed >= 0.1f && !bIsDraggingRight)
+		{
+			bIsDraggingLeft = true;
+			bIsDraggingRight = false;
+			
+			//DealWithPressedButton(false);
+		}
+	}
+
 }
 
 void ARepelTheUprisingCharacter::Move(const FInputActionValue& Value)
@@ -145,6 +168,15 @@ void ARepelTheUprisingCharacter::Look(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
+	if (bHUDIsShowing || bInventoryIsShowing)
+	{
+		if (bIsDraggingRight)
+		{
+			DealWithPressedButton(false);
+		}
+		return;
+	}
+	
 	if (Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
@@ -194,7 +226,7 @@ void ARepelTheUprisingCharacter::StandardActionInGame(const FInputActionValue& V
 	// These events only occur when the player HUD is not on screen 
 	if (!bInventoryIsShowing && !bHUDIsShowing)
 	{
-		
+		UE_LOG(LogTemp, Warning, TEXT("Standard Action Game"));
 	}
 }
 
@@ -203,34 +235,95 @@ void ARepelTheUprisingCharacter::AlternateActionInGame(const FInputActionValue& 
 	// These events only occur when the player HUD is not on screen 
 	if (!bInventoryIsShowing && !bHUDIsShowing)
 	{
-		
+		UE_LOG(LogTemp, Warning, TEXT("Alternative Action Game"));
 	}
 }
 
 void ARepelTheUprisingCharacter::DragStandardHUD(const FInputActionValue& Value)
 {
 	// Dragging can only happen when the player's HUD is on screen
-	if (bInventoryIsShowing || bHUDIsShowing)
+	if ((bInventoryIsShowing || bHUDIsShowing) && LocalSlotStruct.InventoryCompRef != nullptr)
 	{
-		
+		bIsDraggingLeft = true;
+		bIsDraggingRight = false;
 	}
 }
 
 void ARepelTheUprisingCharacter::DragAlternateHUD(const FInputActionValue& Value)
 {
 	// Dragging can only happen when the player's HUD is on screen
-	if (bInventoryIsShowing || bHUDIsShowing)
+	if ((bInventoryIsShowing || bHUDIsShowing) && LocalSlotStruct.InventoryCompRef != nullptr)
 	{
-		
+		bIsDraggingLeft = false;
+		bIsDraggingRight = true;
 	}
 }
 
 void ARepelTheUprisingCharacter::StandardActionHUD(const FInputActionValue& Value)
 {
 	// If the player is not dragging something, show the information for this item
-	if (!bIsDragging)
+	if (!bIsDraggingLeft && !bIsDraggingRight && !bIsDragging)
 	{
-		
+		if (CurrentSlot)
+		{
+			
+		}
+	}
+	else
+	{
+		// The player has clicked the mouse button, drop the stack
+		if (CurrentSlot)
+		{
+		}
+	}
+
+}
+
+void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("AlternateActionHUD called"));
+	// Alternate action in the HUD only happens when the player is dragging
+	if (bIsDragging)
+	{
+		if ((bInventoryIsShowing || bHUDIsShowing) && CurrentSlot)
+		{
+			if (DraggedSlot)
+			{
+				if (DraggedSlot->GetQuantity() > 1)
+				{
+					CurrentSlot->DealWithMouseDrop(DraggedSlot->GetItemID(), 1);
+					const FName LocalItemID = DraggedSlot->GetItemID();
+					const int32 LocalQty = DraggedSlot->GetQuantity() - 1;
+					DraggedSlot->SetInformation(LocalItemID, LocalQty);
+				}
+				else
+				{
+					CurrentSlot->DealWithMouseDrop(DraggedSlot->GetItemID(), DraggedSlot->GetQuantity());
+					DraggedSlot->RemoveFromParent();
+					DraggedSlot = nullptr;
+					bIsDragging = false;
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DraggedSlot is not valid"));
+			}
+		}
+		else
+		{
+			if (CurrentSlot)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Check HUD"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Check CurrentSlot"));
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Is not dragging"));
 	}
 }
 
@@ -248,7 +341,8 @@ void ARepelTheUprisingCharacter::InteractWith()
 	if (bHUDIsShowing)
 	{
 		ChangeInputToGame();
-		PlayerWidgetRef->RemoveCurrentWidget();
+		//PlayerWidgetRef->RemoveCurrentWidget();
+		PlayerWidgetRef->SetVisibility(ESlateVisibility::Hidden);
 		bHUDIsShowing = false;
 	}
 	else if (InventoryComp)
@@ -264,10 +358,18 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 		// Check if an existing HUD, container, trader inventory etc. is already on screen
 		if (bHUDIsShowing)
 		{
-			PlayerWidgetRef->RemoveCurrentWidget();
+			//PlayerWidgetRef->RemoveCurrentWidget();
+			PlayerWidgetRef->RemoveAllWidgets();
 			bHUDIsShowing = false;
+			ChangeInputToGame();
 		}
-		
+		else
+		{
+			PlayerWidgetRef->AddInventoryToHUD();
+			bHUDIsShowing = true;
+			ChangeInputToUI();
+		}
+/*		
 		if (!bInventoryIsShowing)
 		{
 				ChangeInputToUI();
@@ -280,6 +382,7 @@ void ARepelTheUprisingCharacter::TogglePlayerWidget()
 				PlayerWidgetRef->RemoveCurrentWidget();
 				bInventoryIsShowing = false;
 			}
+*/
 	}
 	else
 	{
@@ -293,46 +396,61 @@ void ARepelTheUprisingCharacter::ChangeInputToUI()
 	{
 		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		{
-			if (MenuInputMapping)
+			if (MenuInputMapping && HUDInputMapping)
 			{
 				InputSystem->RemoveMappingContext(DefaultInputMapping);
-				InputSystem->AddMappingContext(MenuInputMapping, 99);
+				InputSystem->AddMappingContext(MenuInputMapping, 0);
+				InputSystem->AddMappingContext(HUDInputMapping, 99);
 			}
 		}
 
 		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
 	}
 }
 
 void ARepelTheUprisingCharacter::ChangeInputToGame()
 {
+	// Check if there is an active widget reference and clear it if there is
+	if (CurrentSlot)
+	{
+		CurrentSlot = nullptr;
+
+		bIsDraggingLeft = false;
+		bIsDraggingRight = false;
+		bIsDragging = false;
+	}
+		
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
  	{
  		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
  		{
- 			if (MenuInputMapping)
+ 			if (HUDInputMapping && MenuInputMapping)
  			{
  				InputSystem->RemoveMappingContext(MenuInputMapping);
+ 				InputSystem->RemoveMappingContext(HUDInputMapping);
  				InputSystem->AddMappingContext(DefaultInputMapping, 0);
  			}
  		}
  
  		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
  	}
 }
 
 void ARepelTheUprisingCharacter::DealWithHoveredSlot(URTUInventorySlot* InventorySlotIn)
 {
-	CurrentSlot = InventorySlotIn;
+	// Check if there is an existing slot, tell it that is can no longer be focused 
 	if (CurrentSlot != nullptr)
 	{
-		const FName CurrentID = InventorySlotIn->GetItemID();
-		UE_LOG(LogTemp, Warning, TEXT("ItemID from %s is %s"), *InventorySlotIn->GetName(), *CurrentID.ToString());
-
+		//CurrentSlot->SetIsFocusable(false);
 	}
-	else
+
+	CurrentSlot = InventorySlotIn;
+	
+	if (CurrentSlot != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Deal with Hovered slot was called without a valid Inventory Slot"));
+		LocalSlotStruct = CurrentSlot->GetInventorySlotStruct();
 	}
 }
 
@@ -349,9 +467,75 @@ void ARepelTheUprisingCharacter::AddContainerToHUD(const TSubclassOf<UUserWidget
 		else
 		{
 			ChangeInputToGame();
-			PlayerWidgetRef->RemoveCurrentWidget();
+			PlayerWidgetRef->SetVisibility(ESlateVisibility::Hidden);
 			bHUDIsShowing = false;
 		}
 	}
-	
+}
+
+void ARepelTheUprisingCharacter::DealWithPressedButton(const bool bNewPressedState)
+{
+	if (DraggedSlot != nullptr)
+	{
+		// The player is hovering above a stack.  Drop it.
+		if (CurrentSlot)
+		{
+			CurrentSlot->DealWithMouseDrop(*DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity());
+			//UE_LOG(LogTemp, Warning, TEXT("ItemID: %s, Quantity: %i"), *DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity());
+			//CurrentSlot->GetInventorySlotStruct().InventoryCompRef->AddToInventory(*DraggedSlot->GetItemID().ToString(), DraggedSlot->GetQuantity(), LocalQtyRemaining);
+			//LocalSlotStruct.InventoryCompRef->AddToInventory(LocalSlotStruct.ItemID, LocalSlotStruct.Quantity, LocalQtyRemaining);
+			//if (LocalQtyRemaining <= 0)
+			{
+				DraggedSlot->RemoveFromParent();
+				DraggedSlot = nullptr;
+			}
+		}
+
+	}
+	else
+	{
+		bInventoryButtonPressed = bNewPressedState;
+		if (!bInventoryButtonPressed)
+		{
+			if ((bIsDraggingLeft || bIsDraggingRight) && LocalSlotStruct.InventoryCompRef != nullptr && LocalSlotStruct.ItemID != FName(""))
+			{
+				bIsDragging = true;
+
+				if (DraggedWidget)
+				{
+					DraggedSlot = CreateWidget<URTUDragDropWidget>(GetLocalViewingPlayerController(), DraggedWidget);
+				
+					if (bIsDraggingLeft || LocalSlotStruct.Quantity == 1)
+					{
+						LocalSlotStruct.InventoryCompRef->RemoveFromInventory(LocalSlotStruct.ContentIndex, true, false);
+						DraggedSlot->SetInformation(LocalSlotStruct.ItemID, LocalSlotStruct.Quantity);
+					}
+					else
+					{
+						LocalSlotStruct.InventoryCompRef->RemoveFromInventory(LocalSlotStruct.ContentIndex, false, false);
+						int32 QuantityToGet;
+						if (LocalSlotStruct.Quantity % 2 == 0)
+						{
+							QuantityToGet = LocalSlotStruct.Quantity / 2;
+						}
+						else
+						{
+							QuantityToGet = (LocalSlotStruct.Quantity - 1) / 2;	
+						}
+						DraggedSlot->SetInformation(LocalSlotStruct.ItemID, QuantityToGet);
+					}
+				
+					DraggedSlot->AddToViewport();
+					CurrentSlot = nullptr;
+				}
+				
+				bIsDraggingLeft = false;
+				bIsDraggingRight = false;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Trying to drag.  InventoryCompRef is %s"), LocalSlotStruct.InventoryCompRef != nullptr ? TEXT("valid") : TEXT("nullptr"));
+			}
+		}
+	}
 }

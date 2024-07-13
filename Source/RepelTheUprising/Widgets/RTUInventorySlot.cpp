@@ -1,8 +1,6 @@
 // Copyright 2024 DME Games
 
 #include "RTUInventorySlot.h"
-
-#include "InterchangeResult.h"
 #include "RTUActionMenuWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
@@ -11,29 +9,28 @@
 #include "Components/TextBlock.h"
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 
 bool URTUInventorySlot::SetReferences(URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex)
 {
-	InventoryCompRef = INInventoryCompRef;
-	ItemID = INItemID;
-	Quantity = INQuantity;
-	ContentIndex = INContentIndex;
+	InventorySlotStruct.InventoryCompRef = INInventoryCompRef;
+	InventorySlotStruct.ItemID = INItemID;
+	InventorySlotStruct.Quantity = INQuantity;
+	InventorySlotStruct.ContentIndex = INContentIndex;
 
-	return InventoryCompRef != nullptr;
+	return InventorySlotStruct.InventoryCompRef != nullptr;
 }
 
 void URTUInventorySlot::UpdateItemSlot() const
 {
 	if (ItemTable)
 	{
-		if (const FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(ItemID, ""))
+		if (const FItemInformationTable* Row = ItemTable->FindRow<FItemInformationTable>(InventorySlotStruct.ItemID, ""))
 		{
 			IconImage->SetBrushFromTexture(Row->ItemThumbnail, false);
 			IconImage->SetVisibility(ESlateVisibility::Visible);
-			QtyTextBox->SetText(FText::FromString(FString::FromInt(Quantity)));
+			QtyTextBox->SetText(FText::FromString(FString::FromInt(InventorySlotStruct.Quantity)));
 
 			if (UObject* FontObj = LoadObject<UObject>(GetWorld(), TEXT("/Script/Engine.Font'/Game/UI/Fonts/MenuFont.MenuFont'"), nullptr, LOAD_None, nullptr))
 			{
@@ -44,15 +41,15 @@ void URTUInventorySlot::UpdateItemSlot() const
 				// Adjust the font size, depending on how large the quantity is
 				FontInfo.Size = 8;
 			
-				if (Quantity > 9 && Quantity < 100)
+				if (InventorySlotStruct.Quantity > 9 && InventorySlotStruct.Quantity < 100)
 				{
 					FontInfo.Size = 7;
 				}
-				if (Quantity > 99 && Quantity < 1000)
+				if (InventorySlotStruct.Quantity > 99 && InventorySlotStruct.Quantity < 1000)
 				{
 					FontInfo.Size = 6;
 				}
-				if (Quantity > 999)
+				if (InventorySlotStruct.Quantity > 999)
 				{
 					FontInfo.Size = 4.5;
 				}
@@ -74,29 +71,36 @@ void URTUInventorySlot::UpdateItemSlot() const
 	}
 }
 
+void URTUInventorySlot::GetSlotParent()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Parent is %s"), *GetParent()->GetName());
+}
+
 void URTUInventorySlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	SlotButton->OnHovered.AddDynamic(this, &URTUInventorySlot::OnButtonHovered);
-	SlotButton->OnUnhovered.AddDynamic(this, &URTUInventorySlot::OnButtonUnhovered);
+	//SlotButton->OnUnhovered.AddDynamic(this, &URTUInventorySlot::OnButtonUnhovered);
+	SlotButton->OnPressed.AddDynamic(this, &URTUInventorySlot::OnButtonPressed);
+	SlotButton->OnReleased.AddDynamic(this, &URTUInventorySlot::OnButtonReleased);
 }
 
-void URTUInventorySlot::DealWithRightMouseDrop(FName InItemID, int32 InQuantity)
+void URTUInventorySlot::DealWithMouseDrop(FName InItemID, int32 InQuantity)
 {
-	if (InventoryCompRef)
+	if (InventorySlotStruct.InventoryCompRef)
 	{
-		if (InventoryCompRef->GetIDAtIndex(ContentIndex) == InItemID)
+		if (InventorySlotStruct.InventoryCompRef->GetIDAtIndex(InventorySlotStruct.ContentIndex) == InItemID)
 		{
-			InventoryCompRef->AddToStack(ContentIndex, InQuantity);
+			InventorySlotStruct.InventoryCompRef->AddToStack(InventorySlotStruct.ContentIndex, InQuantity);
 		}
 		else
 		{
-			InventoryCompRef->CreateNewStack(ContentIndex, InItemID, InQuantity);
+			InventorySlotStruct.InventoryCompRef->CreateNewStack(InventorySlotStruct.ContentIndex, InItemID, InQuantity);
 		}
 	}
 }
-
+/*
 FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	// Only do something with this if the ItemID is not set to the default;
@@ -130,17 +134,16 @@ FReply URTUInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 				
 			}
 		}
-	}*/
+	}
 	return FReply::Unhandled();
 }
 
 void URTUInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-
 	
 }
-
+*/
 void URTUInventorySlot::OnButtonHovered()
 {
 	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), this);
@@ -149,4 +152,14 @@ void URTUInventorySlot::OnButtonHovered()
 void URTUInventorySlot::OnButtonUnhovered()
 {
 	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), nullptr);
+}
+
+void URTUInventorySlot::OnButtonPressed()
+{
+	Execute_InventoryButtonPressed(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), true);
+}
+
+void URTUInventorySlot::OnButtonReleased()
+{
+	Execute_InventoryButtonPressed(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), false);
 }

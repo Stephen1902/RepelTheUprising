@@ -14,6 +14,32 @@ class UOverlay;
 class UImage;
 class UTextBlock;
 
+USTRUCT(Blueprintable)
+struct FInventorySlotStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	TObjectPtr<URTUInventoryComponent> InventoryCompRef;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	FName ItemID;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
+	int32 Quantity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	int32 ContentIndex;
+
+	FInventorySlotStruct()
+	{
+		InventoryCompRef = nullptr;
+		ItemID = FName("");
+		Quantity = -1;
+		ContentIndex = -1;
+	}
+};
+
 UCLASS()
 class REPELTHEUPRISING_API URTUInventorySlot : public UUserWidget, public IInteractInterface
 {
@@ -27,8 +53,12 @@ public:
 	void UpdateItemSlot() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory Slot")
-	FName GetItemID() const { return ItemID; }
-	
+	FInventorySlotStruct GetInventorySlotStruct() const { return InventorySlotStruct; }
+
+	UFUNCTION(BlueprintCallable, Category = "Functions")
+	void DealWithMouseDrop(FName InItemID, int32 InQuantity);
+
+	void GetSlotParent();
 protected:
 	virtual void NativeConstruct() override;
 
@@ -68,36 +98,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	TSubclassOf<class URTUActionMenuWidget> ActionMenuWidget;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
-	TObjectPtr<URTUInventoryComponent> InventoryCompRef = nullptr;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
-	FName ItemID = FName("");
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
-	int32 Quantity = -1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
-	int32 ContentIndex;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
 	bool bIsRightMouseButton = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data Tables")
 	UDataTable* ItemTable;
-
-	UFUNCTION(BlueprintCallable, Category = "Functions")
-	void DealWithRightMouseDrop(FName InItemID, int32 InQuantity);
 	
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	//virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	//virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
 private:
 	UPROPERTY()
 	TObjectPtr<URTUActionMenuWidget> ActionMenuWidgetRef;
 
+	UPROPERTY()
+	FInventorySlotStruct InventorySlotStruct;
+
 	UFUNCTION()
 	void OnButtonHovered();
 	UFUNCTION()
 	void OnButtonUnhovered();
+	UFUNCTION()
+	void OnButtonPressed();
+	UFUNCTION()
+	void OnButtonReleased();
 };

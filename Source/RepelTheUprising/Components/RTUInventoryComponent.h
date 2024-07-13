@@ -23,7 +23,7 @@ struct FSlotStruct
 
 	FSlotStruct()
 	{
-		ItemID = TEXT("Default Name");
+		ItemID = FName("");
 		Quantity = 0;
 	}
 };
@@ -62,6 +62,7 @@ public:
 	FName GetIDAtIndex(const int32 IndexToCheck);
 	void CreateNewStack(int32 ItemIndex, FName ItemID, int32 QuantityToAdd);
 	void AddToStack(int32 IndexToAddTo, int32 QuantityToAdd);
+	int32 AddToSpecificSlot(const FString* SlotNameToCheck); 
 
 protected:
 	// Called on game start
