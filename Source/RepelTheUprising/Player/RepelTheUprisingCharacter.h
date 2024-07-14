@@ -88,6 +88,7 @@ public:
 	ARepelTheUprisingCharacter();
 
 	class URTUInventoryComponent* GetInventoryComp() const { return InventoryComp; }
+	class URTUInventoryComponent* GetHotBarComp() const { return HotBarComp; }
 
 	void AddContainerToHUD(const TSubclassOf<UUserWidget>& WidgetToCreate, URTUInventoryComponent* ContainerInventory);
 	void DealWithPressedButton(bool bNewPressedState);
@@ -134,6 +135,9 @@ protected:
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	URTUInventoryComponent* InventoryComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	URTUInventoryComponent* HotBarComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUHealthComponent* HealthComp;
@@ -151,6 +155,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	URTUPlayerHUD* PlayerWidgetRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class URTUPlayerStatus> PlayerHotBarWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TObjectPtr<URTUPlayerStatus> PlayerHotBarRef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<class URTUDragDropWidget> DraggedWidget;

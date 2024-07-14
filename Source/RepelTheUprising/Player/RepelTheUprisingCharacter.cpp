@@ -16,6 +16,7 @@
 #include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprising/Widgets/RTUDragDropWidget.h"
 #include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
+#include "RepelTheUprising/Widgets/RTUPlayerStatus.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -53,6 +54,7 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 
 /** Components */
 	InventoryComp = CreateDefaultSubobject<URTUInventoryComponent>(TEXT("Inventory Component"));
+	HotBarComp = CreateDefaultSubobject<URTUInventoryComponent>(TEXT("Hot Bar Component"));
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
 	FoodComp = CreateDefaultSubobject<URTUFoodComponent>(TEXT("Food Component"));
@@ -334,6 +336,16 @@ void ARepelTheUprisingCharacter::SetReferences()
 	if (!PlayerControllerRef)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Player Controller Ref"), *GetName());
+	}
+
+	if (PlayerHotBarWidget)
+	{
+		PlayerHotBarRef = CreateWidget<URTUPlayerStatus>(GetLocalViewingPlayerController(), PlayerHotBarWidget);
+		PlayerHotBarRef->AddToViewport();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("The player hot bar widget has not been set"));
 	}
 }
 

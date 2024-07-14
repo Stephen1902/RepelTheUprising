@@ -3,11 +3,8 @@
 
 #include "RTUInventoryGrid.h"
 #include "RTUInventorySlot.h"
-#include "Components/Button.h"
 #include "Components/WrapBox.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
-#include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
-#include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
 
 void URTUInventoryGrid::SetReferences(URTUInventoryComponent* InventoryComponentIN)
 {
