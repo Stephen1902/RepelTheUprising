@@ -84,6 +84,12 @@ class ARepelTheUprisingCharacter : public ACharacter, public IInteractInterface
 	/** Test Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* TestAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* HotBarKeyPress;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* HotBarMouseScroll;
 public:
 	ARepelTheUprisingCharacter();
 
@@ -131,6 +137,8 @@ protected:
 	void DragAlternateHUD(const FInputActionValue& Value);
 	void StandardActionHUD(const FInputActionValue& Value);
 	void AlternateActionHUD(const FInputActionValue& Value);
+	void HotBarKeyPressed(const FInputActionValue& Value);
+	void HotBarMouseScrolled(const FInputActionValue& Value);
 
 /** Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)

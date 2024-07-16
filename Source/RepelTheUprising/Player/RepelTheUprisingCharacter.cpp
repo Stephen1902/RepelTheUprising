@@ -11,6 +11,8 @@
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Widgets/RTUInventorySlot.h"
@@ -125,6 +127,10 @@ void ARepelTheUprisingCharacter::SetupPlayerInputComponent(UInputComponent* Play
 		EnhancedInputComponent->BindAction(StandardDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragStandardHUD);
 		EnhancedInputComponent->BindAction(AlternateDragAction, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::DragAlternateHUD);
 
+		// Hot Bar Actions
+		EnhancedInputComponent->BindAction(HotBarKeyPress, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::HotBarKeyPressed);
+		EnhancedInputComponent->BindAction(HotBarMouseScroll, ETriggerEvent::Triggered, this, &ARepelTheUprisingCharacter::HotBarMouseScrolled);
+		
 		// Test Action
 		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ARepelTheUprisingCharacter::DoTestAction);
 	}
@@ -322,6 +328,55 @@ void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Val
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Is not dragging"));
 	}
+}
+
+void ARepelTheUprisingCharacter::HotBarKeyPressed(const FInputActionValue& Value)
+{
+	switch (const int32 ValueAsInt = UKismetMathLibrary::Round(Value.Get<float>()))
+	{
+	case 1:
+		UE_LOG(LogTemp, Warning, TEXT("1 was pressed"));
+		return;
+	case 2:
+		UE_LOG(LogTemp, Warning, TEXT("2 was pressed"));
+		return;
+	case 3:
+		UE_LOG(LogTemp, Warning, TEXT("3 was pressed"));
+		return;
+	case 4:
+		UE_LOG(LogTemp, Warning, TEXT("4 was pressed"));
+		return;
+	case 5:
+		UE_LOG(LogTemp, Warning, TEXT("5 was pressed"));
+		return;
+	case 6:
+		UE_LOG(LogTemp, Warning, TEXT("6 was pressed"));
+		return;
+	case 7:
+		UE_LOG(LogTemp, Warning, TEXT("7 was pressed"));
+		return;
+	case 8:
+		UE_LOG(LogTemp, Warning, TEXT("8 was pressed"));
+		return;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Nothing was pressed"));
+	}
+}
+
+void ARepelTheUprisingCharacter::HotBarMouseScrolled(const FInputActionValue& Value)
+{
+	// input is a float
+	const float MouseWheelVector = Value.Get<float>();
+
+	if (MouseWheelVector > 0.f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Up, up, up!  The ziggeraut, lickety split"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Down, down, depper and down"));
+	}
+
 }
 
 void ARepelTheUprisingCharacter::SetReferences()

@@ -3,6 +3,7 @@
 #include "RTUInventorySlot.h"
 #include "RTUActionMenuWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
@@ -76,14 +77,26 @@ void URTUInventorySlot::GetSlotParent()
 	UE_LOG(LogTemp, Warning, TEXT("Parent is %s"), *GetParent()->GetName());
 }
 
+void URTUInventorySlot::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	HighlightColourInventory = FLinearColor(1.0f, 1.0f, 0.2f);
+	HighlightColourHotBar = FLinearColor(.01f, 0.36f, .09f);
+	
+}
+
 void URTUInventorySlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	SlotButton->OnHovered.AddDynamic(this, &URTUInventorySlot::OnButtonHovered);
-	//SlotButton->OnUnhovered.AddDynamic(this, &URTUInventorySlot::OnButtonUnhovered);
+	SlotButton->OnUnhovered.AddDynamic(this, &URTUInventorySlot::OnButtonUnhovered);
 	SlotButton->OnPressed.AddDynamic(this, &URTUInventorySlot::OnButtonPressed);
 	SlotButton->OnReleased.AddDynamic(this, &URTUInventorySlot::OnButtonReleased);
+
+	DefaultHighlightColour = OuterBorder->GetBrushColor();
+	
 }
 
 void URTUInventorySlot::DealWithMouseDrop(FName InItemID, int32 InQuantity)
@@ -147,11 +160,19 @@ void URTUInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const 
 void URTUInventorySlot::OnButtonHovered()
 {
 	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), this);
+	OuterBorder->SetBrushColor(HighlightColourInventory);
+//	FSlateBrush NewBrush;
+//	NewBrush.TintColor = FSlateColor(HighlightColour);
+//	OuterBorder->SetBrush(NewBrush);
 }
 
 void URTUInventorySlot::OnButtonUnhovered()
 {
-	Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), nullptr);
+	//Execute_InventorySlotHovered(Cast<ARepelTheUprisingPlayerController>(GetOwningPlayer()), nullptr);
+	OuterBorder->SetBrushColor(DefaultHighlightColour);
+//	FSlateBrush NewBrush;
+//	NewBrush.TintColor = FSlateColor(HighlightColour);
+//	OuterBorder->SetBrush(NewBrush);
 }
 
 void URTUInventorySlot::OnButtonPressed()

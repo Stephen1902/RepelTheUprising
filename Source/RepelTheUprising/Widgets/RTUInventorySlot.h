@@ -60,6 +60,7 @@ public:
 
 	void GetSlotParent();
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
@@ -97,8 +98,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
 	TSubclassOf<class URTUActionMenuWidget> ActionMenuWidget;
-	
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	FLinearColor HighlightColourInventory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Slot")
+	FLinearColor HighlightColourHotBar;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
 	bool bIsRightMouseButton = false;
 	
@@ -123,4 +129,6 @@ private:
 	void OnButtonPressed();
 	UFUNCTION()
 	void OnButtonReleased();
+
+	FLinearColor DefaultHighlightColour;
 };
