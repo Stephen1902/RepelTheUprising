@@ -77,6 +77,18 @@ void URTUInventorySlot::GetSlotParent()
 	UE_LOG(LogTemp, Warning, TEXT("Parent is %s"), *GetParent()->GetName());
 }
 
+void URTUInventorySlot::UpdateHotBarHighlight(const bool IsNewHighlight)
+{
+	if (IsNewHighlight)
+	{
+		OuterBorder->SetBrushColor(HighlightColourHotBar);
+	}
+	else
+	{
+		OuterBorder->SetBrushColor(DefaultHighlightColour);
+	}
+}
+
 void URTUInventorySlot::NativePreConstruct()
 {
 	Super::NativePreConstruct();

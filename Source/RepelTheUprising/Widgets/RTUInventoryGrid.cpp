@@ -31,11 +31,11 @@ void URTUInventoryGrid::PopulateWrapBox()
 		{
 			if (URTUInventorySlot* CurrentSlot = CreateWidget<URTUInventorySlot>(GetOwningPlayer(), SlotWidget))
 			{
-					if (bool bSuccess = CurrentSlot->SetReferences(InventoryCompRef, InventoryContents[i].ItemID, InventoryContents[i].Quantity, i))
-					{
-						CurrentSlot->UpdateItemSlot();
-						GridWrapBox->AddChildToWrapBox(CurrentSlot);
-					}
+				if (bool bSuccess = CurrentSlot->SetReferences(InventoryCompRef, InventoryContents[i].ItemID, InventoryContents[i].Quantity, i))
+				{
+					CurrentSlot->UpdateItemSlot();
+					GridWrapBox->AddChildToWrapBox(CurrentSlot);
+				}
 			}
 		}
 	}

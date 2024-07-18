@@ -20,6 +20,7 @@ public:
 	void SetReferences(URTUInventoryComponent* InventoryComponentIN);
 	UFUNCTION()
 	void PopulateWrapBox();
+	UWrapBox* GetGridWrapBox() const { return GridWrapBox; }
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))

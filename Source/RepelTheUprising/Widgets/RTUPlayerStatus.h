@@ -27,6 +27,8 @@ class REPELTHEUPRISING_API URTUPlayerStatus : public UUserWidget
 
 public:
 	void SetReferences(class URTUInventoryComponent* InventoryComponentIN);
+
+	void HotBarValueChanged(const int32 HotBarValue);
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
@@ -112,4 +114,7 @@ protected:
 
 private:
 	virtual void NativeConstruct() override;
+
+	UPROPERTY()
+	URTUInventorySlot* HighlightedSlot;
 };

@@ -59,6 +59,8 @@ public:
 	void DealWithMouseDrop(FName InItemID, int32 InQuantity);
 
 	void GetSlotParent();
+
+	void UpdateHotBarHighlight(const bool IsNewHighlight);
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;

@@ -4,6 +4,7 @@
 #include "RTUPlayerStatus.h"
 
 #include "RTUInventoryGrid.h"
+#include "Components/WrapBox.h"
 #include "Kismet/GameplayStatics.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
 
@@ -14,6 +15,22 @@ void URTUPlayerStatus::SetReferences(URTUInventoryComponent* InventoryComponentI
 		InventoryComponentRef = InventoryComponentIN;
 	}
 }
+
+void URTUPlayerStatus::HotBarValueChanged(const int32 HotBarValue)
+{
+	if (HighlightedSlot != nullptr)
+	{
+		HighlightedSlot->UpdateHotBarHighlight(false);
+	}
+
+	HighlightedSlot = Cast<URTUInventorySlot>(StatusHotBarGrid->GetGridWrapBox()->GetChildAt(HotBarValue));
+
+	if (HighlightedSlot)
+	{
+		HighlightedSlot->UpdateHotBarHighlight(true);
+	}
+}
+
 
 void URTUPlayerStatus::NativeConstruct()
 {

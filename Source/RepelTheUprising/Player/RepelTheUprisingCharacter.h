@@ -198,6 +198,8 @@ private:
 	bool bIsDragging = false;
 	bool bInventoryButtonPressed = false;
 	double TimePressed = 0.f;
+	int32 SelectedHotBarValue = 0;
+	int32 CurrentHotBarValue = 0;
 	
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;

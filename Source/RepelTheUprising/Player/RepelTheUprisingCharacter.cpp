@@ -332,51 +332,76 @@ void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Val
 
 void ARepelTheUprisingCharacter::HotBarKeyPressed(const FInputActionValue& Value)
 {
-	switch (const int32 ValueAsInt = UKismetMathLibrary::Round(Value.Get<float>()))
+	if (!bInventoryIsShowing && !bHUDIsShowing && PlayerHotBarRef)
 	{
-	case 1:
-		UE_LOG(LogTemp, Warning, TEXT("1 was pressed"));
-		return;
-	case 2:
-		UE_LOG(LogTemp, Warning, TEXT("2 was pressed"));
-		return;
-	case 3:
-		UE_LOG(LogTemp, Warning, TEXT("3 was pressed"));
-		return;
-	case 4:
-		UE_LOG(LogTemp, Warning, TEXT("4 was pressed"));
-		return;
-	case 5:
-		UE_LOG(LogTemp, Warning, TEXT("5 was pressed"));
-		return;
-	case 6:
-		UE_LOG(LogTemp, Warning, TEXT("6 was pressed"));
-		return;
-	case 7:
-		UE_LOG(LogTemp, Warning, TEXT("7 was pressed"));
-		return;
-	case 8:
-		UE_LOG(LogTemp, Warning, TEXT("8 was pressed"));
-		return;
-	default:
-		UE_LOG(LogTemp, Warning, TEXT("Nothing was pressed"));
+		const int32 ValueAsInt = UKismetMathLibrary::Round(Value.Get<float>());
+		if (ValueAsInt != CurrentHotBarValue)
+		{
+			CurrentHotBarValue = ValueAsInt;
+			// Array of inventory grid slots starts at 0
+			switch (ValueAsInt)
+			{
+			case 1:
+				PlayerHotBarRef->HotBarValueChanged(0);
+				return;
+			case 2:
+				PlayerHotBarRef->HotBarValueChanged(1);
+				return;
+			case 3:
+				PlayerHotBarRef->HotBarValueChanged(2);
+				return;
+			case 4:
+				PlayerHotBarRef->HotBarValueChanged(3);
+				return;
+			case 5:
+				PlayerHotBarRef->HotBarValueChanged(4);
+				return;
+			case 6:
+				PlayerHotBarRef->HotBarValueChanged(5);
+				return;
+			case 7:
+				PlayerHotBarRef->HotBarValueChanged(6);
+				return;
+			case 8:
+				PlayerHotBarRef->HotBarValueChanged(7);
+				return;
+			default:
+				UE_LOG(LogTemp, Warning, TEXT("Nothing was pressed"));
+			}
+		}
 	}
 }
 
 void ARepelTheUprisingCharacter::HotBarMouseScrolled(const FInputActionValue& Value)
 {
-	// input is a float
-	const float MouseWheelVector = Value.Get<float>();
-
-	if (MouseWheelVector > 0.f)
+	// This should only happen if the player inventory is not on screen
+	if (!bInventoryIsShowing && !bHUDIsShowing)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Up, up, up!  The ziggeraut, lickety split"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Down, down, depper and down"));
-	}
+		// input is a float
+		const float MouseWheelVector = Value.Get<float>();
 
+		if (MouseWheelVector != 0.f && GetHotBarComp() && PlayerHotBarRef)
+		{
+			if (MouseWheelVector < 0.f)
+			{
+				SelectedHotBarValue += 1; 
+				if (SelectedHotBarValue > GetHotBarComp()->GetContents().Num() - 1)
+				{
+					SelectedHotBarValue = 0;
+				}
+			}
+			else
+			{
+				SelectedHotBarValue -= 1;
+				if (SelectedHotBarValue == -1)
+				{
+					SelectedHotBarValue = GetHotBarComp()->GetContents().Num() -1;	
+				}
+			}
+
+			PlayerHotBarRef->HotBarValueChanged(SelectedHotBarValue);
+		}
+	}
 }
 
 void ARepelTheUprisingCharacter::SetReferences()
@@ -397,6 +422,7 @@ void ARepelTheUprisingCharacter::SetReferences()
 	{
 		PlayerHotBarRef = CreateWidget<URTUPlayerStatus>(GetLocalViewingPlayerController(), PlayerHotBarWidget);
 		PlayerHotBarRef->AddToViewport();
+		PlayerHotBarRef->HotBarValueChanged(0);
 	}
 	else
 	{

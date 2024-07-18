@@ -63,7 +63,6 @@ public:
 	void CreateNewStack(int32 ItemIndex, FName ItemID, int32 QuantityToAdd);
 	void AddToStack(int32 IndexToAddTo, int32 QuantityToAdd);
 	int32 AddToSpecificSlot(const FString* SlotNameToCheck); 
-
 protected:
 	// Called on game start
 	virtual void BeginPlay() override;
