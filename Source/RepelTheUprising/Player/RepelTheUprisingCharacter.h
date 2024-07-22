@@ -156,6 +156,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUFoodComponent* FoodComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUCraftingComponent* CraftingComp;
+
 /** END OF COMPONENTS */
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
@@ -204,7 +207,7 @@ private:
 	UPROPERTY()
 	class ARTUPlayerState* PlayerStateRef;
 	UPROPERTY()
-	APlayerController* PlayerControllerRef;
+	class ARepelTheUprisingPlayerController* PlayerControllerRef;
 	
 	void SetReferences();
 
@@ -221,5 +224,9 @@ private:
 	URTUDragDropWidget* DraggedSlot;
 	UPROPERTY()
 	FInventorySlotStruct LocalSlotStruct;
-};
 
+	virtual URTUInventoryComponent* GetOwnerInventoryComp_Implementation() override;
+
+	UFUNCTION(Client, reliable)
+	void AddWidgets();
+};

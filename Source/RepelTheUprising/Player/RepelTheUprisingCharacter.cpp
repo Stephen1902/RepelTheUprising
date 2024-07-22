@@ -8,10 +8,12 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "RepelTheUprisingPlayerController.h"
 #include "RTUPlayerState.h"
 #include "../Components/RTUHealthComponent.h"
 #include "../Components/RTUStaminaComponent.h"
-#include "Kismet/KismetMaterialLibrary.h"
+#include "../Components/RTUCraftingComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
@@ -60,6 +62,7 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
 	FoodComp = CreateDefaultSubobject<URTUFoodComponent>(TEXT("Food Component"));
+	CraftingComp = CreateDefaultSubobject<URTUCraftingComponent>(TEXT("Crafting Component"));
 	
 /** Variables */
 	bIsCrouching = false;
@@ -72,19 +75,6 @@ void ARepelTheUprisingCharacter::BeginPlay()
 
 	// The code is too fast for the object being referenced to be fully created.  Wait before setting references.
 	GetWorld()->GetTimerManager().SetTimer(ReferenceDelayHandle, this, &ARepelTheUprisingCharacter::SetReferences, 0.5f, false, 0.5f);
-
-/*
-	if (PlayerHUDWidget)
-	{
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		URTUPlayerHUD* PlayerWidgetR = CreateWidget<URTUPlayerHUD>(GetLocalViewingPlayerController(), PlayerHUDWidget);
-		//PlayerWidgetRef->AddToViewport();
-		if (PlayerWidgetR == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("HUD Reference is invalid"));
-		}
-	}
-*/
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -332,6 +322,7 @@ void ARepelTheUprisingCharacter::AlternateActionHUD(const FInputActionValue& Val
 
 void ARepelTheUprisingCharacter::HotBarKeyPressed(const FInputActionValue& Value)
 {
+	// This should only happen if the player inventory is not on screen
 	if (!bInventoryIsShowing && !bHUDIsShowing && PlayerHotBarRef)
 	{
 		const int32 ValueAsInt = UKismetMathLibrary::Round(Value.Get<float>());
@@ -370,6 +361,10 @@ void ARepelTheUprisingCharacter::HotBarKeyPressed(const FInputActionValue& Value
 			}
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Something went wrong with a hot bar press"));
+	}
 }
 
 void ARepelTheUprisingCharacter::HotBarMouseScrolled(const FInputActionValue& Value)
@@ -402,6 +397,11 @@ void ARepelTheUprisingCharacter::HotBarMouseScrolled(const FInputActionValue& Va
 			PlayerHotBarRef->HotBarValueChanged(SelectedHotBarValue);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Something went wrong with a hot bar scroll"));
+	}
+
 }
 
 void ARepelTheUprisingCharacter::SetReferences()
@@ -412,21 +412,14 @@ void ARepelTheUprisingCharacter::SetReferences()
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to Get Player State Ref"), *GetName());
 	}
 
-	PlayerControllerRef = Cast<APlayerController>(GetController());
+	PlayerControllerRef = Cast<ARepelTheUprisingPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!PlayerControllerRef)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s failed to get Player Controller Ref"), *GetName());
 	}
-
-	if (PlayerHotBarWidget)
-	{
-		PlayerHotBarRef = CreateWidget<URTUPlayerStatus>(GetLocalViewingPlayerController(), PlayerHotBarWidget);
-		PlayerHotBarRef->AddToViewport();
-		PlayerHotBarRef->HotBarValueChanged(0);
-	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("The player hot bar widget has not been set"));
+		AddWidgets();
 	}
 }
 
@@ -489,6 +482,11 @@ void ARepelTheUprisingCharacter::ChangeInputToUI()
 		PlayerControllerRef->SetInputMode(InputModeData);
 
 	}
+}
+
+URTUInventoryComponent* ARepelTheUprisingCharacter::GetOwnerInventoryComp_Implementation()
+{
+	return InventoryComp;	
 }
 
 void ARepelTheUprisingCharacter::ChangeInputToGame()
@@ -604,3 +602,43 @@ void ARepelTheUprisingCharacter::DealWithPressedButton(const bool bNewPressedSta
 		}
 	}
 }
+
+void ARepelTheUprisingCharacter::AddWidgets_Implementation()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		if (PlayerHUDWidget)
+		{
+			PlayerWidgetRef = CreateWidget<URTUPlayerHUD>(PlayerController, PlayerHUDWidget);
+			PlayerWidgetRef->AddToViewport();
+			if (!PlayerWidgetRef)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HUD Reference is invalid"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerHUDWidget has not been set."));
+		}
+
+		if (PlayerHotBarWidget)
+		{
+			PlayerHotBarRef = CreateWidget<URTUPlayerStatus>(PlayerController, PlayerHotBarWidget);
+			if (PlayerHotBarRef)
+			{
+				PlayerHotBarRef->AddToViewport();
+				PlayerHotBarRef->HotBarValueChanged(0);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s failed to create a PlayerHotBarWidget"), *GetName());
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("The player hot bar widget has not been set"));
+		}
+	}
+}
+

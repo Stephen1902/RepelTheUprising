@@ -26,6 +26,9 @@ public:
 	FText LookAt();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
+	class URTUInventoryComponent* GetOwnerInventoryComp();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	void InteractWith(class ARepelTheUprisingCharacter* CharacterWhoInteracted);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
@@ -33,4 +36,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactive")
 	void InventoryButtonPressed(bool NewPressedState);
+	
 };

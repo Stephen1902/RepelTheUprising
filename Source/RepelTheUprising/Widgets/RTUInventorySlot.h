@@ -59,7 +59,7 @@ public:
 	void DealWithMouseDrop(FName InItemID, int32 InQuantity);
 
 	void GetSlotParent();
-
+	
 	void UpdateHotBarHighlight(const bool IsNewHighlight);
 protected:
 	virtual void NativePreConstruct() override;
@@ -122,7 +122,7 @@ private:
 
 	UPROPERTY()
 	FInventorySlotStruct InventorySlotStruct;
-
+	
 	UFUNCTION()
 	void OnButtonHovered();
 	UFUNCTION()
@@ -131,6 +131,7 @@ private:
 	void OnButtonPressed();
 	UFUNCTION()
 	void OnButtonReleased();
-
+	
 	FLinearColor DefaultHighlightColour;
+
 };

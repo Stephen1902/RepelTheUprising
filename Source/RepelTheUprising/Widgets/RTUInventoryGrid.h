@@ -17,6 +17,7 @@ class REPELTHEUPRISING_API URTUInventoryGrid : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetReferences(URTUInventoryComponent* InventoryComponentIN);
 	UFUNCTION()
 	void PopulateWrapBox();

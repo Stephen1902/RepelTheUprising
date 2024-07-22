@@ -12,6 +12,8 @@
 #include "Engine/DataTable.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
 #include "RepelTheUprising/Player/RepelTheUprisingPlayerController.h"
+#include "Net/UnrealNetwork.h"
+
 
 bool URTUInventorySlot::SetReferences(URTUInventoryComponent* INInventoryCompRef, FName INItemID, int32 INQuantity, int32 INContentIndex)
 {
@@ -79,6 +81,7 @@ void URTUInventorySlot::GetSlotParent()
 
 void URTUInventorySlot::UpdateHotBarHighlight(const bool IsNewHighlight)
 {
+	UE_LOG(LogTemp, Warning, TEXT("UpdateHotBarHighlight called by %s"), *GetOwningPlayer()->GetName());
 	if (IsNewHighlight)
 	{
 		OuterBorder->SetBrushColor(HighlightColourHotBar);
@@ -95,7 +98,6 @@ void URTUInventorySlot::NativePreConstruct()
 
 	HighlightColourInventory = FLinearColor(1.0f, 1.0f, 0.2f);
 	HighlightColourHotBar = FLinearColor(.01f, 0.36f, .09f);
-	
 }
 
 void URTUInventorySlot::NativeConstruct()

@@ -29,6 +29,7 @@ public:
 	void SetReferences(class URTUInventoryComponent* InventoryComponentIN);
 
 	void HotBarValueChanged(const int32 HotBarValue);
+	URTUInventoryComponent* GetInventoryRed() const { return InventoryComponentRef; }
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))

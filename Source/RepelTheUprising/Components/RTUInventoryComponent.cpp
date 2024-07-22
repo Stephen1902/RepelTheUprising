@@ -14,7 +14,6 @@
 #include "RepelTheUprising/Framework/RTUBlueprintFunctionLibrary.h"
 #include "RepelTheUprising/Items/GameItemBase.h"
 #include "RepelTheUprising/Player/RepelTheUprisingCharacter.h"
-#include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprising/Widgets/RTU_DisplayMessage.h"
 
 #define InteractTrace ECC_GameTraceChannel2
