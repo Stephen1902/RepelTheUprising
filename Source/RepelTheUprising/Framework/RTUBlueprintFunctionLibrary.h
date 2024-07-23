@@ -59,6 +59,63 @@ struct FItemInformationTable : public FTableRowBase
 	FOnConsumeStruct OnConsumeStruct;
 };
 
+UENUM(Blueprintable)
+enum class ECraftingLocation : uint8
+{
+	ECF_Self			UMETA(DisplayName="Self"),
+	ECF_Campfire		UMETA(DisplayName="Campfire"),
+	ECF_Oven			UMETA(DisplayName="Oven"),
+	ECF_Worktable		UMETA(DisplayName="Worktable"),
+	ECF_Workbench		UMETA(DisplayName="Workbench"),
+	ECF_Forge			UMETA(DisplayName="Forge"),
+	ECF_ChemSet			UMETA(DisplayName="Chemistry Set"),
+	ECF_ChemStation		UMETA(DisplayName="Chemistry Station"),
+	ECF_ConcreteMixer	UMETA(DisplayName="Concrete Mixer")
+};
+
+USTRUCT(BlueprintType)
+struct FItemCraftingTable : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// Unique item name
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	FName ItemName;
+
+	// Helper description of the item, giving the player a clue what is needed to craft
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	FName ItemDescription;
+
+	// Item to be created, must be an item in the ItemInformationTable
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	FName CraftedItem;
+
+	// Location that this item is crafted in
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	TEnumAsByte<ECraftingLocation> CraftingLocation;
+
+	// Maximum level item can be crafted to in above location
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	int32 MaxCraftingLevel;
+
+	// Items and quantities needed to craft
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	TMap<FName, int32> ItemNeeds;
+
+	// Time in seconds item needs to craft
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	double CraftingTime;
+
+	FItemCraftingTable()
+	{
+		ItemName = FName("");
+		ItemDescription = FName("");
+		CraftedItem = FName("");
+		CraftingLocation = ECraftingLocation::ECF_Internal;
+		MaxCraftingLevel = 999;
+		CraftingTime = 1.0f;
+	}
+};
 
 UCLASS()
 class REPELTHEUPRISING_API URTUBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
