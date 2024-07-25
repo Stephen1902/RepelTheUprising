@@ -59,7 +59,7 @@ struct FItemInformationTable : public FTableRowBase
 	FOnConsumeStruct OnConsumeStruct;
 };
 
-UENUM(Blueprintable)
+UENUM(BlueprintType)
 enum class ECraftingLocation : uint8
 {
 	ECF_Self			UMETA(DisplayName="Self"),
@@ -92,7 +92,7 @@ struct FItemCraftingTable : public FTableRowBase
 
 	// Location that this item is crafted in
 	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
-	TEnumAsByte<ECraftingLocation> CraftingLocation;
+	ECraftingLocation CraftingLocation;
 
 	// Maximum level item can be crafted to in above location
 	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
@@ -111,7 +111,7 @@ struct FItemCraftingTable : public FTableRowBase
 		ItemName = FName("");
 		ItemDescription = FName("");
 		CraftedItem = FName("");
-		CraftingLocation = ECraftingLocation::ECF_Internal;
+		CraftingLocation = ECraftingLocation::ECF_Self;
 		MaxCraftingLevel = 999;
 		CraftingTime = 1.0f;
 	}

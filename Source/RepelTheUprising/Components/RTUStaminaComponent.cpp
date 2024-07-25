@@ -84,7 +84,10 @@ void URTUStaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	}
 	else
 	{
-		RecoverStamina(DeltaTime);
+		if (CurrentStamina < MaxStamina)
+		{
+			RecoverStamina(DeltaTime);
+		}
 	}
 }
 
@@ -102,6 +105,7 @@ void URTUStaminaComponent::SetCharacterSpeed(const float NewCharacterSpeed)
 void URTUStaminaComponent::DrainStamina(const float DeltaTime)
 {
 	CurrentStamina -= StaminaDrainPerSecond * DeltaTime;
+	OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	if (CurrentStamina <= 0.f)
 	{
 		CurrentStamina = 0.f;
@@ -115,6 +119,7 @@ void URTUStaminaComponent::RecoverStamina(const float DeltaTime)
 	{
 		CurrentStamina += StaminaRecoveryPerSecond * DeltaTime;
 		CurrentStamina = FMath::Clamp(CurrentStamina, 0.f, MaxStamina);
+		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	}
 }
 

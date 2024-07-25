@@ -118,4 +118,29 @@ private:
 
 	UPROPERTY()
 	URTUInventorySlot* HighlightedSlot;
+
+	/* Player specific variables and functions */
+	UPROPERTY()
+	TObjectPtr<class URTUStaminaComponent> StaminaComponentRef;
+	UFUNCTION()
+	void UpdateStaminaValue(double NewStaminaValue, double MaxStaminaValue);
+
+	double MaxPlayerHealth = 0.f;
+	UPROPERTY()
+	TObjectPtr<class URTUHealthComponent> HealthComponentRef;
+	UFUNCTION()
+	void UpdateHealthValue(URTUHealthComponent* OwningHealthComp, double Health, double HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	UFUNCTION()
+	void UpdateMaxHealthValue(double NewMaxHealthValue);
+
+	UPROPERTY()
+	TObjectPtr<class URTUFoodComponent> FoodComponentRef;
+	UFUNCTION()
+	void UpdateFoodWidget(FText FoodAmount, double FoodAsPercentage);
+
+	UPROPERTY()
+	TObjectPtr<class URTUWaterComponent> WaterComponentRef;
+	UFUNCTION()
+	void UpdateWaterValue(URTUWaterComponent* OwningWaterComp, double WaterToChange, double WaterDelta);
+	/* End of player specific variables and functions */
 };

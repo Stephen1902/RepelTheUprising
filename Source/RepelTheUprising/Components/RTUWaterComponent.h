@@ -7,7 +7,7 @@
 #include "RTUWaterComponent.generated.h"
 
 UDELEGATE(BlueprintAuthorityOnly)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWaterChanged, URTUWaterComponent*, OwningWaterComp, float, HealthToChange, float, HealthDelta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWaterChanged, URTUWaterComponent*, OwningWaterComp, double, WaterToChange, double, WaterDelta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class REPELTHEUPRISING_API URTUWaterComponent : public UActorComponent
@@ -23,10 +23,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(ReplicatedUsing=OnRep_Water, BlueprintReadOnly, Category = "Water Component")
-	float Water;
+	double Water;
 
 	UFUNCTION()
-	void OnRep_Water(float OldWater);
+	void OnRep_Water(double OldWater);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water Component")
 	float StartingWater;
@@ -44,15 +44,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	float GetWater() const;
+	double GetMaxWater() const { return MaxWater; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnWaterChanged OnWaterChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Water Component")
-	void ConsumeWater(const float WaterAmount);
+	void ConsumeWater(const double WaterAmount);
 
 private:
-	float MaxWater;
+	double MaxWater;
 	bool bUsingExtraEnergy;
 
 	UFUNCTION()

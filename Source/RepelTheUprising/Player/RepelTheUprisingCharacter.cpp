@@ -224,7 +224,10 @@ void ARepelTheUprisingCharacter::ToggleCrouch(const FInputActionValue& Value)
 
 void ARepelTheUprisingCharacter::DoTestAction(const FInputActionValue& Value)
 {
-	
+	if (HealthComp)
+	{
+		HealthComp->AdjustHealth(-10.);
+	}
 }
 
 void ARepelTheUprisingCharacter::StandardActionInGame(const FInputActionValue& Value)

@@ -12,6 +12,8 @@ URTUWaterComponent::URTUWaterComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SetIsReplicatedByDefault(true);
+
 	StartingWater = 100.f;
 	MaxWater = StartingWater;
 	Water = StartingWater;
@@ -38,9 +40,9 @@ void URTUWaterComponent::BeginPlay()
 	}
 }
 
-void URTUWaterComponent::OnRep_Water(float OldWater)
+void URTUWaterComponent::OnRep_Water(double OldWater)
 {
-	const float NewWater = Water + OldWater;
+	const double NewWater = Water + OldWater;
 
 	OnWaterChanged.Broadcast(this, Water, NewWater);
 }
@@ -58,6 +60,11 @@ void URTUWaterComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	{
 		Water = FMath::Clamp(Water - (WaterDrainExtra * DeltaTime), 0.f, MaxWater);
 	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		OnRep_Water(0.f);
+	}
 }
 
 float URTUWaterComponent::GetWater() const
@@ -65,7 +72,7 @@ float URTUWaterComponent::GetWater() const
 	return Water;
 }
 
-void URTUWaterComponent::ConsumeWater(const float WaterAmount)
+void URTUWaterComponent::ConsumeWater(const double WaterAmount)
 {
 	if (WaterAmount <= 0.0f)
 	{

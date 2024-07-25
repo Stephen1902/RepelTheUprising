@@ -8,6 +8,7 @@
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintingChanged, bool, NewSprintingState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChanged, double, NewStaminaLevel, double, MaxStaminaLevel);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class REPELTHEUPRISING_API URTUStaminaComponent : public UActorComponent
@@ -45,6 +46,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSprintingChanged OnSprintingChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnStaminaChanged OnStaminaChanged;
+	
+	
 	UFUNCTION(BlueprintCallable, Category = "Stamina Component")
 	void AdjustStamina(const float AmountToAdjust);
 protected:

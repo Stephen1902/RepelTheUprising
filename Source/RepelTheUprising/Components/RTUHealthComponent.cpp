@@ -8,21 +8,26 @@
 // Sets default values for this component's properties
 URTUHealthComponent::URTUHealthComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
+	
 	StartingHealth = 100.f;
+	HealthRecovery = 0.0167f;  // Recovers one health per rl minute
 	bIsDead = false;
 
 	TeamNum = 255;
-
+	
 	SetIsReplicatedByDefault(true);
 }
 
 
 void URTUHealthComponent::AdjustHealth(const double AmountToAdjust)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Adjust health called.  Amount to add %f"), AmountToAdjust);
 	if (AmountToAdjust != 0.f)
 	{
-		Health += FMath::Clamp(Health, 0.f, MaxHealth);
+		Health = FMath::Clamp(Health + AmountToAdjust, 0.f, MaxHealth);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("New Health is %f"), Health);
 }
 
 void URTUHealthComponent::AdjustMaxHealth(const double AmountToAdjust)
@@ -50,9 +55,28 @@ void URTUHealthComponent::BeginPlay()
 	MaxHealth = Health;
 }
 
+void URTUHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (HealthRecovery > 0. && !bIsDead && Health < MaxHealth)
+	{
+		Health = (FMath::Clamp(Health + (HealthRecovery * DeltaTime), 0.f, MaxHealth));
+
+		// OnRep functions aren't called on the server automatically.  Call manually.
+		if (GetOwner()->HasAuthority())
+		{
+			OnRep_Health(0.f);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%s has health of %f"), *GetOwner()->GetName(), Health);
+}
+
 
 void URTUHealthComponent::OnRep_Health(double OldHealth)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Health Called"));
 	const double Damage = Health - OldHealth;
 	
 	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
@@ -80,6 +104,11 @@ void URTUHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage
 
 	// Update health clamped
 	Health = FMath::Clamp(Health - Damage, 0.0f, StartingHealth);
+
+	if (GetOwner()->HasAuthority())
+	{
+		OnRep_Health(Damage);
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(Health));
 
@@ -170,6 +199,11 @@ bool URTUHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
 double URTUHealthComponent::GetHealth() const
 {
 	return Health;
+}
+
+double URTUHealthComponent::GetMaxHealth() const
+{
+	return MaxHealth;
 }
 
 bool URTUHealthComponent::GetIsDead() const
