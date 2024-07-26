@@ -60,6 +60,9 @@ private:
 	UPROPERTY(Replicated)
 	bool bUsingExtraEnergy;
 
+	UFUNCTION()
+	void DealWithFoodConsumed(FName ItemID, const UDataTable* DataTableIn);
+
 	//  Server functions
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SprintStatusChanged(bool NewStatusIn);
@@ -75,4 +78,5 @@ private:
 	float TimerDelay = 0.1f;
 	void DrainFood();
 };
+
 

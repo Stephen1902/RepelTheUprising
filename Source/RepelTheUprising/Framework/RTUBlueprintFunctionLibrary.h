@@ -34,6 +34,16 @@ struct FOnConsumeStruct
 	}
 };
 
+UENUM()
+enum class EItemType : uint8
+{
+	EIT_Consumable		UMETA(DisplayName="Consumable"),
+	EIT_Tool			UMETA(DisplayName="Tool"),
+	EIT_Weapon			UMETA(DisplayName="Weapon"),
+	EIT_Placeable		UMETA(DisplayName="Placeable"),
+	EIT_Misc			UMETA(DisplayName="Misc")
+};
+
 USTRUCT(BlueprintType)
 struct FItemInformationTable : public FTableRowBase
 {
@@ -54,6 +64,9 @@ struct FItemInformationTable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
 	int32 MaxStackSize;
+
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
+	EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category="Item Info")
 	FOnConsumeStruct OnConsumeStruct;

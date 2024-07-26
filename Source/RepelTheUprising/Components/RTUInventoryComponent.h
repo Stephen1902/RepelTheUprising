@@ -9,6 +9,7 @@
 #include "RTUInventoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemConsumed, FName, ItemName, UDataTable*, DataTableToUse);
 
 USTRUCT(BlueprintType)
 struct FSlotStruct
@@ -52,6 +53,9 @@ public:
 
 	UPROPERTY()
 	FOnInventoryUpdated OnInventoryUpdated;
+
+	UPROPERTY()
+	FOnItemConsumed OnItemConsumed;
 
 	UFUNCTION(Server, Unreliable, Category="Functions")
 	void Server_RemoveFromInventory(int32 ItemIndexIN, bool RemoveWholeStackIN, bool ConsumeIN);

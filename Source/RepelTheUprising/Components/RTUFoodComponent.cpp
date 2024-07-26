@@ -2,6 +2,8 @@
 
 
 #include "RTUFoodComponent.h"
+#include "../Framework/RTUBlueprintFunctionLibrary.h"
+#include "RTUInventoryComponent.h"
 #include "RTUStaminaComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -37,6 +39,11 @@ void URTUFoodComponent::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Failed to get Stamina Component reference in Food Component for %s"), *GetName());
 		}
+
+		if (URTUInventoryComponent* InventoryCompRef = Cast<URTUInventoryComponent>(MyOwner->GetComponentByClass(URTUInventoryComponent::StaticClass())))
+		{
+			InventoryCompRef->OnItemConsumed.AddDynamic(this, &URTUFoodComponent::DealWithFoodConsumed);		
+		}
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(FoodDrainTimer, this, &URTUFoodComponent::DrainFood, TimerDelay, true);
@@ -50,11 +57,6 @@ void URTUFoodComponent::BeginPlay()
 
 void URTUFoodComponent::AdjustFood(const int32 AmountToAdjust)
 {
-	if (AmountToAdjust == 0)
-	{
-		return;
-	}
-
 	if (!GetOwner()->HasAuthority())
 	{
 		Server_AdjustFood(AmountToAdjust);
@@ -127,8 +129,7 @@ void URTUFoodComponent::Server_AdjustFood_Implementation(const int32 AmountToAdj
 
 bool URTUFoodComponent::Server_AdjustFood_Validate(const int32 AmountToAdjust)
 {
-	// TODO Get item directly from data table to prevent cheating
-	return true;
+	return AmountToAdjust > 0;
 }
 
 void URTUFoodComponent::DrainFood()
@@ -152,6 +153,23 @@ void URTUFoodComponent::DrainFood()
 		const float FoodAsPercentage = 1.0f - ((MaxFoodAsDouble - FoodAsDouble) / MaxFoodAsDouble);
 		OnWidgetUpdate.Broadcast(FText::FromString(FString::FromInt(FoodAsInt)), FoodAsPercentage);		
 	}
+}
+
+void URTUFoodComponent::DealWithFoodConsumed(const FName ItemID, const UDataTable* DataTableIn)
+{
+	if (ItemID != FName("") && DataTableIn)
+	{
+		if (const FItemInformationTable* Row = DataTableIn->FindRow<FItemInformationTable>(ItemID, ""))
+		{
+			if (Row->OnConsumeStruct.EffectOnFood > 0)
+			{
+				AdjustFood(Row->OnConsumeStruct.EffectOnFood);
+			}
+			return;
+		}
+	}
+	// The function has been called but without valid info.  Cheating could be being attempted.
+	Server_AdjustFood(0);
 }
 
 void URTUFoodComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

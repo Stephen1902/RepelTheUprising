@@ -447,39 +447,9 @@ void URTUInventoryComponent::ConsumeItem(const int32 ItemIndex)
 
 void URTUInventoryComponent::Server_ConsumeItem_Implementation(FName INItemID)
 {
-	if (const FItemInformationTable* ItemInfo = GetCurrentItemInfo(INItemID))
+	if (GetCurrentItemInfo(INItemID))
 	{
-		if (ItemInfo->OnConsumeStruct.EffectOnFood != 0.f)
-		{
-			if (URTUFoodComponent* FoodComp = Cast<URTUFoodComponent>( PlayerCharacterRef->GetComponentByClass(URTUFoodComponent::StaticClass())))
-			{
-				FoodComp->AdjustFood(ItemInfo->OnConsumeStruct.EffectOnFood);
-			}
-		}
-		
-		if (ItemInfo->OnConsumeStruct.EffectOnThirst != 0.f)
-		{
-			if (URTUWaterComponent* WaterComp = Cast<URTUWaterComponent>( PlayerCharacterRef->GetComponentByClass(URTUWaterComponent::StaticClass())))
-			{
-				WaterComp->ConsumeWater(ItemInfo->OnConsumeStruct.EffectOnThirst);
-			}
-		}
-
-		if (ItemInfo->OnConsumeStruct.EffectOnStamina != 0.f)
-		{
-			if (URTUStaminaComponent* StaminaComp = Cast<URTUStaminaComponent>(PlayerCharacterRef->GetComponentByClass(URTUStaminaComponent::StaticClass())))
-			{
-				StaminaComp->AdjustStamina(ItemInfo->OnConsumeStruct.EffectOnStamina);
-			}
-		}
-
-		if (ItemInfo->OnConsumeStruct.EffectOnHealth != 0.f)
-		{
-			if (URTUHealthComponent* HealthComp = Cast<URTUHealthComponent>(PlayerCharacterRef->GetComponentByClass(URTUHealthComponent::StaticClass())))
-			{
-				HealthComp->Heal(ItemInfo->OnConsumeStruct.EffectOnHealth);
-			}
-		}
+		OnItemConsumed.Broadcast(INItemID, ItemTable);
 	}	
 }
 
