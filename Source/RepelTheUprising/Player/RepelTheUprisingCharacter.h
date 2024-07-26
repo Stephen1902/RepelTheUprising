@@ -157,6 +157,9 @@ protected:
 	class URTUFoodComponent* FoodComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
+	class URTUWaterComponent* WaterComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Components)
 	class URTUCraftingComponent* CraftingComp;
 
 /** END OF COMPONENTS */

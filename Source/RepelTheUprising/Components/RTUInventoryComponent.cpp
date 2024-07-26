@@ -453,7 +453,7 @@ void URTUInventoryComponent::Server_ConsumeItem_Implementation(FName INItemID)
 		{
 			if (URTUFoodComponent* FoodComp = Cast<URTUFoodComponent>( PlayerCharacterRef->GetComponentByClass(URTUFoodComponent::StaticClass())))
 			{
-				FoodComp->ConsumeFood(ItemInfo->OnConsumeStruct.EffectOnFood);
+				FoodComp->AdjustFood(ItemInfo->OnConsumeStruct.EffectOnFood);
 			}
 		}
 		

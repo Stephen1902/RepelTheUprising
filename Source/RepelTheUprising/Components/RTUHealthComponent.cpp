@@ -69,8 +69,6 @@ void URTUHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 			OnRep_Health(0.f);
 		}
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("%s has health of %f"), *GetOwner()->GetName(), Health);
 }
 
 

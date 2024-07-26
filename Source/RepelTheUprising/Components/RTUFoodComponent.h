@@ -6,10 +6,12 @@
 #include "Components/ActorComponent.h"
 #include "RTUFoodComponent.generated.h"
 
-UDELEGATE(BlueprintAuthorityOnly)
+/*UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnFoodChanged, URTUFoodComponent*, OwningFoodComp, int32, FoodToChange, int32, FoodDelta);
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxFoodChanged, int32, MaxFood);
+*/
+UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWidgetUpdate, FText, CurrentFood, double, FoodAsPercentage);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -25,24 +27,12 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(ReplicatedUsing=OnRep_Food, BlueprintReadOnly, Category = "Food Component")
-	int32 WholeFood;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Food Component")
+	int32 FoodAsInt;
 
-	UPROPERTY(ReplicatedUsing=OnRep_FoodValue, BlueprintReadOnly, Category = "Food Component")
-	int32 Food;
-
-	UFUNCTION()
-	void OnRep_Food(int32 OldFood);
-
-	UPROPERTY(ReplicatedUsing=OnRep_MaxFood, BlueprintReadOnly, Category = "Food Component")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Food Component")
 	int32 MaxFood;
 
-	UFUNCTION()
-	void OnRep_MaxFood(int32 OldMaxFood);
-
-	UFUNCTION()
-	void OnRep_FoodValue(int32 OldFood);
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Food Component")
 	float StartingFood;
 
@@ -55,33 +45,34 @@ protected:
 	double FoodDrainExtra;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	int32 GetFood() const;
-	int32 GetMaxFood() const { return MaxFood; }
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnFoodChanged OnFoodChanged;
-
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnMaxFoodChanged OnMaxFoodChanged;
-
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnWidgetUpdate OnWidgetUpdate;
 	
 	UFUNCTION(BlueprintCallable, Category = "Food Component")
-	void ConsumeFood(const int32 FoodAmount);
+	void AdjustFood(const int32 AmountToAdjust);
 
-private:
-	bool bUsingExtraEnergy;
-
+	UFUNCTION(BlueprintCallable, Category = "Food Component")
+	void UpdateMaxFood(const int32 AmountToAdjust);
+	
 	UFUNCTION()
 	void SprintStatusChanged(bool NewStatusIn);
-	void SetNewFoodValue(const int32 NewFoodValue);
+private:
+	UPROPERTY(Replicated)
+	bool bUsingExtraEnergy;
+
+	//  Server functions
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SetNewFoodValue(const int32 NewFoodValue);
+	void Server_SprintStatusChanged(bool NewStatusIn);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_UpdateMaxFood(const int32 AmountToAdjust);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_AdjustFood(const int32 AmountToAdjust);
+	// End of server functions
 	
 	double FoodAsDouble;
+
+	FTimerHandle FoodDrainTimer;
+	float TimerDelay = 0.1f;
+	void DrainFood();
 };
 

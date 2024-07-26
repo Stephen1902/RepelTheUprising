@@ -17,6 +17,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "RepelTheUprising/Components/RTUFoodComponent.h"
 #include "RepelTheUprising/Components/RTUInventoryComponent.h"
+#include "RepelTheUprising/Components/RTUWaterComponent.h"
 #include "RepelTheUprising/Widgets/RTUInventorySlot.h"
 #include "RepelTheUprising/Widgets/RTUDragDropWidget.h"
 #include "RepelTheUprising/Widgets/RTUPlayerHUD.h"
@@ -62,6 +63,7 @@ ARepelTheUprisingCharacter::ARepelTheUprisingCharacter()
 	HealthComp = CreateDefaultSubobject<URTUHealthComponent>(TEXT("Health Component"));
 	StaminaComp = CreateDefaultSubobject<URTUStaminaComponent>(TEXT("Stamina Component"));
 	FoodComp = CreateDefaultSubobject<URTUFoodComponent>(TEXT("Food Component"));
+	WaterComp = CreateDefaultSubobject<URTUWaterComponent>(TEXT("Water Component"));
 	CraftingComp = CreateDefaultSubobject<URTUCraftingComponent>(TEXT("Crafting Component"));
 	
 /** Variables */
